@@ -1,0 +1,145 @@
+
+# Find user name by user ID
+
+pk = ""
+
+user = User.objects.get(pk=pk)
+user_name = user.username
+print(user_name)
+
+
+
+
+------------------------------------------------------------------------------
+#find profiles description
+
+id = ""
+
+from core.models import Profile
+from django.contrib.auth.models import User
+
+alpha = Profile.objects.get(user_id=id)
+interest = alpha.description
+print(interest)
+
+
+
+
+----------------------------------------------------------------------------------
+#find profile tags
+
+id = ""
+
+from core.models import Profile
+from django.contrib.auth.models import User
+
+profile = Profile.objects.get(user_id=id)
+user_interests = profile.interests.all()
+
+
+for interest in user_interests:
+    print(interest.name) 
+
+
+
+
+
+
+-------------------------------------------------------------------------------------
+#list of profile user has chat with
+
+
+id = ''
+
+from core.models import Message
+from django.db.models import Q
+
+chat = Message.objects.filter(
+    Q(sender=id) | Q(receiver=id)
+    )
+
+unique_sender = chat.sender.distinct()
+
+print(unique_sender)
+
+
+-------------------------------------------------------------------------------------
+#Chat between two users:
+
+id_1 = ""
+id_2 = ""
+
+from django.contrib.auth.models import User
+
+# put user ID accordingly
+user_1 = User.objects.get(id=id_1) 
+user_2 = User.objects.get(id=id_2) 
+
+from django.db.models import Q
+from core.models import Message
+
+# Query to retrieve messages between user_1 and user_2 in chronological order
+chat = Message.objects.filter(
+    Q(sender=user_1, receiver=user_2) | Q(sender=user_2, receiver=user_1)
+    ).order_by('created_at')
+
+# Printing the chat messages
+for message in chat:
+    print(f"{message.sender.username} -> {message.receiver.username}: {message.chat} - {message.created_at}")
+
+
+
+
+-------------------------------------------------------------------------------------------------------------
+#List of bubbles user is member of
+
+id = ""
+
+from core.models import BubbleMember, Bubble
+
+User_bubbles = BubbleMember.objects.filter(user_id=id) 
+
+for bubble in User_bubbles:
+    print(f"{bubble.bubble_id.name}")
+
+
+
+
+
+
+---------------------------------------------------------------------------------------------------------------
+#List of members in bubble:
+
+
+# Start with name of bubble
+Name = ""
+from core.models import BubbleMember, Bubble
+
+Bubble = Bubble.objects.get(name = Name)
+
+# Or directly start with bubbble ID
+Bubble_id = Bubble.id
+
+members_in_bubble = BubbleMember.objects.filter(bubble_id=Bubble_id) 
+
+print(f'Member of bubble,  {Bubble} are:')
+
+for member in members_in_bubble:
+    print(f"{member.user_id.username}")
+
+
+
+
+
+---------------------------------------------------------------------------------------------------------------------
+#List of community chat in a bubble
+
+
+id = ""
+
+from core.models import BubbleMember, Bubble, CommunityChat
+
+Community_Posts = CommunityChat.objects.filter(bubble_id = id).order_by('created_on')
+
+for post in Community_Posts:
+    print(f"{post.user}> {post.message} ---{post.created_on}")
