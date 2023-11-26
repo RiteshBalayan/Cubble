@@ -3,6 +3,8 @@
 
 pk = ""
 
+from django.contrib.auth.models import User
+
 user = User.objects.get(pk=pk)
 user_name = user.username
 print(user_name)
@@ -40,7 +42,34 @@ user_interests = profile.interests.all()
 for interest in user_interests:
     print(interest.name) 
 
+---------------------------------------------------------------------------------
+#list of friends
 
+user_id = ""
+
+from django.contrib.auth.models import User
+from core.models import Message, Friend
+from django.db.models import Q
+
+
+user_friends_id = (
+        Friend.objects.filter(Q(user1=user_id) | Q(user2=user_id))
+        .values_list('user1_id', flat=True)
+        .union(Friend.objects.filter(Q(user1=user_id) | Q(user2=user_id)).values_list('user2_id', flat=True))
+    )
+
+friend = []
+for friends in user_friends_id:
+    user = User.objects.get(pk=friends)
+    user_name = user.username
+    friend.append(user_name)
+
+print (friend)
+
+for friends in user_friends:
+    user = User.objects.get(pk=friends)
+    user_name = user.username
+    print(user_name)
 
 
 

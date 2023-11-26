@@ -1,0 +1,4 @@
+1) profile pic not visible on taskbar on pages where user authtication required # redolved
+2) userprofile page crashes if discription not defined.
+3) profile own name appers in friends section
+4) All foreign keys have cascade, This can be disasterous.

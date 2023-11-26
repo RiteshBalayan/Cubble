@@ -1,0 +1,32 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+    {% if request.user.is_authenticated %}
+        <!-- User is logged in -->
+        <div class="text-center my-10">
+            <h1 class="text-4xl font-bold">Welcome back, {{ request.user.username }}!</h1>
+            <!-- Add fancy content or features for logged-in users -->
+            <p class="mt-4 text-lg">Enjoy our exclusive features and connect with amazing people!</p>
+            <br><br>
+            <a href="#" class="bg-blue-500 text-white px-6 py-3 rounded-lg mt-6 hover:bg-blue-700">Enter</a>
+            <!-- Add more fancy stuff for logged-in users -->
+        </div>
+    {% else %}
+        <!-- User is not logged in -->
+        <div class="text-center my-10">
+            <h1 class="text-4xl font-bold">Welcome to Our Dating App!</h1>
+            <!-- Add some random marketing content for visitors -->
+            <p class="mt-4 text-lg">Discover a new way to meet exciting individuals.</p>
+            <p class="mt-4 text-lg">Our app features:</p>
+            <ul class="list-disc list-inside mt-2 text-left">
+                <li>Advanced matching algorithm</li>
+                <li>Secure and private connections</li>
+                <li>Unique user experience</li>
+                <!-- Add more features -->
+            </ul>
+            <p class="mt-4 text-lg">Meet the Team:</p>
+            <p class="mt-2">Our team is dedicated to creating an outstanding experience for you!</p>
+            <!-- Add team building content -->
+        </div>
+    {% endif %}
+{% endblock %}

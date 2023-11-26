@@ -1,0 +1,20 @@
+{% extends 'core/base.html' %}
+
+{% block title %}My Friends{% endblock %}
+
+{% block content %}
+    <h3 class="text-2xl font-bold mb-4">My Friends</h3>
+
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {% for friend in user_friends %}
+            <a href="{% url 'core:friend_profile_view' friend_username=friend.username %}" class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition duration-300">
+                <div class="flex justify-center mb-2">
+                    <img src="{{ friend.Profile.profile_pic.url }}" alt="Profile Picture" class="w-16 h-16 rounded-full border-2 border-blue-500">
+                </div>
+                <p class="text-center font-semibold">{{ friend.username }}</p>
+            </a>
+        {% empty %}
+            <p>No friends found</p>
+        {% endfor %}
+    </div>
+{% endblock %}

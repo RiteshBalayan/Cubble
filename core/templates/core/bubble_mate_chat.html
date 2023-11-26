@@ -1,0 +1,33 @@
+{% extends 'core/base.html' %}
+
+{% block title %} Chat with {{ friend_profile.username }} {% endblock %}
+
+{% block content %}
+    <div class="max-w-lg mx-auto mt-6">
+        <h1 class="text-2xl font-bold mb-4">Chat with 
+            <div class="w-12 h-12 rounded-full flex items-center justify-center bg-blue-200 hover:bg-blue-300">
+                <span class="text-lg font-bold text-gray-800">{{ friend_profile.username|first|upper }}</span>
+            </div>
+        </h1>
+
+        <!-- Existing messages -->
+        <ul>
+            {% for message in chat %}
+                <div class="mb-4">
+                    <h2 class="text-lg font-semibold">{{ message.sender.username }}</h2>
+                    <p class="bg-gray-200 rounded-lg p-2">{{ message.chat }}</p>
+                    <p class="text-sm italic text-gray-500">{{ message.created_at }}</p>
+                </div>
+            {% empty %}
+                <li>No chat found</li>
+            {% endfor %}
+        </ul>
+
+        <!-- Form for sending messages -->
+        <form method="post" class="mt-6">
+            {% csrf_token %}
+            <textarea name="chat" class="w-full rounded-lg border px-4 py-2 focus:outline-none focus:border-blue-500" placeholder="Type your message here..." required></textarea>
+            <button type="submit" class="mt-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg focus:outline-none">Send Message</button>
+        </form>
+    </div>
+{% endblock %}

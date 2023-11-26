@@ -1,0 +1,50 @@
+{% extends 'core/base.html' %}
+
+{% block title %} Bubble Post {% endblock %}
+
+{% block content %}
+
+
+
+<div class="max-w-lg mx-auto mt-6">
+
+
+    <!-- Existing messages -->
+
+       
+
+        
+
+            <div class="mb-6">
+                
+                            
+                                <p class="font-semibold">{{ bubble_post.title }}</p>
+                                <p class="text-gray-600">{{ bubble_post.message }}</p>
+                                <p class="text-sm text-gray-500">{{ bubble_post.created_on }}</p>
+                            
+    
+            </div>
+
+
+            <ul>
+                {% for message in responses %}
+                    <div class="mb-4">
+                        <p class="bg-gray-200 rounded-lg p-2">{{ message.message }}</p>
+                        <p class="text-sm italic text-gray-500">{{ message.created_on }}</p>
+                    </div>
+                {% empty %}
+                    <li>No chat found</li>
+                {% endfor %}
+            </ul>
+
+    <!-- Form for sending messages -->
+    <form method="post" class="mt-6">
+        {% csrf_token %}
+        <textarea name="message" class="w-full rounded-lg border px-4 py-2 focus:outline-none focus:border-blue-500" placeholder="Type your message here..." required></textarea>
+        <button type="submit" class="mt-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg focus:outline-none">Send Message</button>
+    </form>
+</div>
+
+
+
+{% endblock %}

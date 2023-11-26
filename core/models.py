@@ -45,9 +45,10 @@ class ProfileTag(models.Model):
 
 class Profile(models.Model):
 
-    user_id = models.OneToOneField(User, related_name='user_profile', on_delete=models.CASCADE)
-    description = models.CharField(max_length = 500)
-    interests = models.ManyToManyField(ProfileTag)
+    user_id = models.OneToOneField(User, related_name='Profile', on_delete=models.CASCADE)
+    description = models.CharField(max_length = 500, blank=True)
+    interests = models.ManyToManyField(ProfileTag, blank=True)
+    profile_pic = models.ImageField(upload_to='profil_pic', blank=True)
 
     def __str__(self):
         return f"Profile of {self.user_id.username}"
@@ -62,12 +63,15 @@ class CommunityChat(models.Model):
 
     def __str__(self):
         return f"{self.title} #{self.id}"
+    
+    
 
 class CommunityResponse(models.Model):
 
     original_chat = models.ForeignKey(CommunityChat, on_delete=models.CASCADE)
     user = models.ForeignKey(BubbleMember, related_name='chatter_small', on_delete=models.CASCADE)
     message = models.CharField(max_length = 500)
+    created_on = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
         return f"{self.user.user_id.username} responce #{self.id} to ({self.original_chat.title})"

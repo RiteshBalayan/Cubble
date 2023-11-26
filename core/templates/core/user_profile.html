@@ -1,0 +1,33 @@
+{% extends 'core/base.html' %}
+
+{% block title %}{{ username }}{% endblock %}
+
+{% block content %}
+<div class="w-1/2 my-6 mx-auto p-6 bg-gray-100 rounded-xl">
+    <h1 class="mb-4 text-3xl">Name: {{ request.user.username }}</h1>
+    
+    <div class="mb-4">
+        <h2 class="text-lg font-semibold mb-2">Description:</h2>
+        <p>{{ profile.description }}</p>
+    </div>
+    
+    <div class="mb-4">
+        <h3 class="text-lg font-semibold mb-2">Interests:</h3>
+        <ul>
+            {% for interest in profile.interests.all %}
+                <li>{{ interest.name }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    
+    <!-- Display profile picture if available -->
+    <div class="mb-4">
+        <h3 class="text-lg font-semibold mb-2">Profile Picture:</h3>
+        {% if profile.profile_pic %}
+            <img src="{{ profile.profile_pic.url }}" alt="Profile Picture" class="w-40 h-auto rounded-lg">
+        {% endif %}
+    </div>
+    
+    <a href="{% url 'core:update_profile' %}" class="block w-full text-center bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-700">Update Profile</a>
+</div>
+{% endblock %}

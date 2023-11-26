@@ -1,0 +1,20 @@
+{% extends 'core/base.html' %}
+
+{% block title %}My Bubbles{% endblock %}
+
+{% block content %}
+    <h3 class="text-2xl font-bold mb-4">My Bubbles</h3>
+
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {% for bubble in user_bubbles %}
+            <a href="{% url 'core:bubble' pk=bubble.bubble_id.id %}" class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition duration-300">
+                <div class="flex justify-center mb-2">
+                    <img src="{{   bubble.bubble_id.thumbnail.url   }}" alt="Bubble Image" class="w-24 h-24 object-cover rounded-lg">
+                </div>
+                <p class="text-center font-semibold">{{ bubble.bubble_id.name }}</p>
+            </a>
+        {% empty %}
+            <p>No bubbles found</p>
+        {% endfor %}
+    </div>
+{% endblock %}
