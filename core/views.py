@@ -77,31 +77,81 @@ def friend_profile_view(request, friend_username):
 @friend_required
 def friend_chat(request, friend_username):
     friend_profile = get_object_or_404(User, username=friend_username)
+    friend_username = friend_username
     logged_in_user_profile = request.user  # Assuming profile is linked to User
 
-    # Query to retrieve messages between user_1 and user_2 in chronological order
-    chat = Message.objects.filter(
-        Q(sender=friend_profile, receiver=logged_in_user_profile) | Q(sender=logged_in_user_profile, receiver=friend_profile)
-        ).order_by('created_at')
 
-    if request.method == 'POST':
+
+
+
+    return render(request, 'core/friend_chat.html', {
+        'friend_profile': friend_profile,
+        'friend_username' : friend_username,
+        'logged_in_user_profile': logged_in_user_profile,
+        
+        
+    })
+
+from django.http import JsonResponse
+from django.db.models import Q
+from .models import Message
+from django.shortcuts import get_object_or_404
+from django.contrib.auth.models import User
+
+def fetch_comments(request, friend_username):
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        friend_profile = get_object_or_404(User, username=friend_username)
+        logged_in_user_profile = request.user
+
+        # Count the total number of chats
+        total_chats = Message.objects.filter(
+            Q(sender=friend_profile, receiver=logged_in_user_profile) |
+            Q(sender=logged_in_user_profile, receiver=friend_profile)
+        ).count()
+
+        # Fetch the latest 10 chats only if there are more than 10 chats
+        if total_chats > 10:
+            chats = Message.objects.filter(
+                Q(sender=friend_profile, receiver=logged_in_user_profile) |
+                Q(sender=logged_in_user_profile, receiver=friend_profile)
+            ).order_by('-created_at')[:10]
+            # Reorder the fetched messages by 'created_at' in ascending order
+            chats = sorted(chats, key=lambda x: x.created_at)
+        else:
+            chats = Message.objects.filter(
+                Q(sender=friend_profile, receiver=logged_in_user_profile) |
+                Q(sender=logged_in_user_profile, receiver=friend_profile)
+            ).order_by('created_at')
+
+        chat_data = [{
+            "sender": chat.sender.username,
+            "message": chat.chat,
+            "created_at": chat.created_at.strftime("%Y-%m-%d %H:%M:%S")
+        } for chat in chats]
+
+        return JsonResponse({"chats": chat_data})
+    else:
+        # Handle non-AJAX requests here
+        pass
+
+
+
+def post_message(request, friend_username):
+    friend_profile = get_object_or_404(User, username=friend_username)
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         form = MessageForm(request.POST)
         if form.is_valid():
-            # Save the form with the authenticated user as the sender and the friend as the receiver
             message = form.save(commit=False)
             message.sender = request.user
             message.receiver = friend_profile
             message.save()
-            form = MessageForm()  # Clear the form after successful submission
-    else:
-        form = MessageForm()
+            return JsonResponse({'status': 'success', 'message': message.chat })
+        else:
+            return JsonResponse({'status': 'error', 'errors': form.errors})
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'})
 
-    return render(request, 'core/friend_chat.html', {
-        'friend_profile': friend_profile,
-        'logged_in_user_profile': logged_in_user_profile,
-        'chat': chat,
-        'form': form,
-    })
+
+
 
 @login_required
 def mybubbles(request):

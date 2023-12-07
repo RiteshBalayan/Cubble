@@ -17,6 +17,8 @@ urlpatterns = [
     path('bubble/<int:pk>/', views.bubble, name='bubble'),
     path('friend_profile/<str:friend_username>/', views.friend_profile_view, name='friend_profile_view'),
     path('friend_chat/<str:friend_username>/', views.friend_chat, name='friend_chat'),
+    path('fetch-comments/<str:friend_username>/', views.fetch_comments, name='fetch_comments'),
+    path('post-message/<str:friend_username>/', views.post_message, name='post_message'),
     path('bubble/<int:pk>/mate_chat/<str:username>/', views.bubble_mate_chat, name='bubble_mate_chat'),
     path('bubble/<int:pk>/bubble_post/<int:post_id>/', views.bubble_post, name='bubble_post'),
 
