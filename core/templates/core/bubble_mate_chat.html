@@ -3,6 +3,11 @@
 {% block title %} Chat with {{ friend_profile.username }} {% endblock %}
 
 {% block content %}
+
+<!-- Include jQuery and your custom script -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
     <div class="max-w-lg mx-auto mt-6">
         <h1 class="text-2xl font-bold mb-4">Chat with 
             <div class="w-12 h-12 rounded-full flex items-center justify-center bg-blue-200 hover:bg-blue-300">
@@ -11,23 +16,99 @@
         </h1>
 
         <!-- Existing messages -->
-        <ul>
-            {% for message in chat %}
-                <div class="mb-4">
-                    <h2 class="text-lg font-semibold">{{ message.sender.username }}</h2>
-                    <p class="bg-gray-200 rounded-lg p-2">{{ message.chat }}</p>
-                    <p class="text-sm italic text-gray-500">{{ message.created_at }}</p>
-                </div>
-            {% empty %}
-                <li>No chat found</li>
-            {% endfor %}
-        </ul>
+        <ul id="chat-container">
+            <!-- Chat messages will be loaded here by JavaScript -->
+            </ul>
 
+        {% if bubble.status == '1' %}
         <!-- Form for sending messages -->
-        <form method="post" class="mt-6">
+        <form id="comment-form" class="mt-6">
             {% csrf_token %}
             <textarea name="chat" class="w-full rounded-lg border px-4 py-2 focus:outline-none focus:border-blue-500" placeholder="Type your message here..." required></textarea>
             <button type="submit" class="mt-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg focus:outline-none">Send Message</button>
         </form>
+        {% else %}
+        <p>It is archived bubble</p>
+        {% endif %}
+        
     </div>
+
+
+
+
+<!--Java Script to fetch Comments-->
+<script>
+
+    function updateChat() {
+        var PK = '{{pk}}';
+        var Username = '{{username}}';
+        $.ajax({
+        url: '/fetch_chat_bubble_mate/' + PK + '/' + Username +'/', 
+            dataType: 'json',
+            success: function (data) {
+                var chatList = '';
+                data.chats.forEach(function (message) {
+                    // Check if the message sender is the friend
+                    var bgColorClass = (message.sender === Username) ? 'bg-blue-200' : 'bg-pink-200';
+                    var textAlignClass = (message.sender !== Username) ? 'text-right' : '';
+    
+                    chatList += '<div class="mb-4" >' +
+                                    
+                                    '<p class="' + bgColorClass + ' rounded-lg p-2 ' + textAlignClass + '">' + message.message + '</p>' +
+                                    '<p class="text-sm italic text-gray-500">' + message.created_at + '</p>' +
+                                '</div>';
+                });
+                if (chatList === '') {
+                    chatList = '<li>No chat found</li>';
+                }
+                $('#chat-container').html(chatList);  // Assuming your chat container has the ID 'chat-container'
+            }
+        });
+    }
+    
+    // Call updateChat function periodically, e.g., every 5 seconds
+    setInterval(updateChat, 1000);
+    
+    // Initial fetch when the page loads
+    $(document).ready(updateChat);
+    </script>
+
+
+<!-- Java Script for submiting comments-->
+<script>
+    $(document).ready(function() {
+        $('#comment-form').on('submit', function(e) {
+            e.preventDefault();
+            var formData = $(this).serialize();
+    
+            // Get the CSRF token
+            var csrftoken = $('[name=csrfmiddlewaretoken]').val();
+            var PK = '{{pk}}';
+            var Username = '{{username}}';
+
+            $.ajax({
+                url: '/post_chat_bubble_mate/' + PK + '/' + Username + '/', // Use the Django template variables
+                type: 'POST',
+                data: formData,
+                dataType: 'json',
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                },
+                success: function(data) {
+                    if (data.status === 'success') {
+                        // Handle success
+                        $('#comment-form')[0].reset();
+                    } else {
+                        // Handle form errors
+                    }
+                },
+                error: function(xhr, errmsg, err) {
+                    // Handle AJAX errors
+                }
+            });
+        });
+    });
+    </script>
+
+
 {% endblock %}

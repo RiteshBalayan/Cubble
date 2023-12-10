@@ -80,10 +80,6 @@ def friend_chat(request, friend_username):
     friend_username = friend_username
     logged_in_user_profile = request.user  # Assuming profile is linked to User
 
-
-
-
-
     return render(request, 'core/friend_chat.html', {
         'friend_profile': friend_profile,
         'friend_username' : friend_username,
@@ -167,9 +163,9 @@ from django.db.models import Q
 def myfriends(request):
     user = request.user
     user_friends_id = (
-        Friend.objects.filter(Q(user1=user.id) | Q(user2=user.id))
+        Friend.objects.filter((Q(user1=user.id)  | Q(user2=user.id) ) & Q(status1='accepted') & Q(status2='accepted'))
         .values_list('user1_id', flat=True)
-        .union(Friend.objects.filter(Q(user1=user.id) | Q(user2=user.id)).values_list('user2_id', flat=True))
+        .union(Friend.objects.filter((Q(user1=user.id)  | Q(user2=user.id) ) & Q(status1='accepted') & Q(status2='accepted')).values_list('user2_id', flat=True))
     )
 
     user_friends = []
@@ -188,29 +184,93 @@ def bubble(request, pk):
     Bubble_id = bubble.id
     members_in_bubble = BubbleMember.objects.filter(bubble_id=Bubble_id) 
 
-    #List of community Chats
+    #my friend list
+    user = request.user
+    user_friends_id = (
+        Friend.objects.filter((Q(user1=user.id)  | Q(user2=user.id) ) & Q(status1='accepted') & Q(status2='accepted'))
+        .values_list('user1_id', flat=True)
+        .union(Friend.objects.filter((Q(user1=user.id)  | Q(user2=user.id) ) & Q(status1='accepted') & Q(status2='accepted')).values_list('user2_id', flat=True))
+    )
 
-    Community_Posts = CommunityChat.objects.filter(bubble_id = Bubble_id).order_by('created_on')
+    user_friends = []
+    
+    for friends in user_friends_id:
+        user = User.objects.get(pk=friends)
+        user_friends.append(user)
 
+    #my friend list pending
+    user_friends_id_pending = (
+        Friend.objects.filter((Q(user1=user.id)  | Q(user2=user.id) ))
+        .values_list('user1_id', flat=True)
+        .union(Friend.objects.filter((Q(user1=user.id)  | Q(user2=user.id) )).values_list('user2_id', flat=True))
+    )
 
-    #new Comunity Chats
-    if request.method == 'POST':
-        form = CommunityChatForm(request.POST)
-        if form.is_valid():
-            community_chat = form.save(commit=False)
-            community_chat.bubble_id = bubble
-            community_chat.user = BubbleMember.objects.get(bubble_id=Bubble_id, user_id=request.user )  # Assuming user is authenticated
-            community_chat.save()
-            form = CommunityChatForm()  # Clear the form after successful submission
-    else:
-        form = CommunityChatForm()
+    user_friends_pending = []
 
+    for friend_id in user_friends_id_pending:
+        try:
+            # Check if the current user is user1 in the friendship
+            friendship = Friend.objects.get(user1=user.id, user2=friend_id)
+            if friendship.status1 == Friend.ACCEPTED:
+                friend_user = User.objects.get(pk=friend_id)
+                user_friends_pending.append(friend_user)
+        except Friend.DoesNotExist:
+            pass  # Friend object not found for this combination
+
+        try:
+            # Check if the current user is user2 in the friendship
+            friendship = Friend.objects.get(user2=user.id, user1=friend_id)
+            if friendship.status2 == Friend.ACCEPTED:
+                friend_user = User.objects.get(pk=friend_id)
+                user_friends_pending.append(friend_user)
+        except Friend.DoesNotExist:
+            pass  # Friend object not found for this combination
+      
+    
     return render(request, 'core/bubble.html' , {
         'bubble' : bubble,
         'members_in_bubble' : members_in_bubble,
-        'form': form,
-        'Community_Posts': Community_Posts,
+        'user_friends': user_friends,
+        'user_friends_pending':user_friends_pending,
     })
+
+def fetch_post(request, pk):
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        bubble = get_object_or_404(Bubble, pk=pk)
+        Bubble_id = bubble.id
+
+        #List of community Chats
+        Community_Posts = CommunityChat.objects.filter(bubble_id = Bubble_id).order_by('created_on')
+
+        post_data = [{
+            "sender": Community_Post.user.user_id.username,
+            "title": Community_Post.title,
+            "message": Community_Post.message,
+            "created_at": Community_Post.created_on.strftime("%Y-%m-%d %H:%M:%S"),
+            "post_id": Community_Post.id
+        } for Community_Post in Community_Posts]
+
+        return JsonResponse({"posts": post_data})
+    else:
+        # Handle non-AJAX requests here
+        pass
+    
+
+def post_post(request, pk):
+    bubble = get_object_or_404(Bubble, pk=pk)
+    Bubble_id = bubble.id
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        form = CommunityChatForm(request.POST)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.bubble_id = bubble
+            post.user = BubbleMember.objects.get(bubble_id=Bubble_id, user_id=request.user )
+            post.save()
+            return JsonResponse({'status': 'success', 'message': post.message })
+        else:
+            return JsonResponse({'status': 'error', 'errors': form.errors})
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'})
+
 
 @part_of_bubble_required
 def bubble_post(request, pk, post_id):
@@ -251,27 +311,135 @@ def bubble_mate_chat(request, pk, username):
     bubble_friend_profile = BubbleMember.objects.get(bubble_id=bubble, user_id=friend_profile )
     Bubble_logged_in_user_profile = BubbleMember.objects.get(bubble_id=bubble, user_id=logged_in_user_profile )
 
-    chat = Bubblemate_chat.objects.filter(
+    return render(request, 'core/bubble_mate_chat.html', {
+        'friend_profile': friend_profile,
+        'pk': pk,
+        'username':username,
+        'bubble':bubble,
+    })
+
+def fetch_chat_bubble_mate(request, pk, username):
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        bubble = get_object_or_404(Bubble, pk=pk)
+        friend_profile = get_object_or_404(User, username=username)
+        logged_in_user_profile = request.user
+        bubble_friend_profile = BubbleMember.objects.get(bubble_id=bubble, user_id=friend_profile )
+        Bubble_logged_in_user_profile = BubbleMember.objects.get(bubble_id=bubble, user_id=logged_in_user_profile )
+
+        # Count the total number of chats
+        total_chats = Bubblemate_chat.objects.filter(
         Q(sender=bubble_friend_profile, receiver=Bubble_logged_in_user_profile, bubble_id=bubble) | 
         Q(sender=Bubble_logged_in_user_profile, receiver=bubble_friend_profile,bubble_id=bubble)
-        ).order_by('created_at')
+        ).count()
 
+        # Fetch the latest 10 chats only if there are more than 10 chats
+        if total_chats > 10:
+            chats = Bubblemate_chat.objects.filter(
+                Q(sender=bubble_friend_profile, receiver=Bubble_logged_in_user_profile, bubble_id=bubble) | 
+                Q(sender=Bubble_logged_in_user_profile, receiver=bubble_friend_profile,bubble_id=bubble)
+            ).order_by('-created_at')[:10]
+            # Reorder the fetched messages by 'created_at' in ascending order
+            chats = sorted(chats, key=lambda x: x.created_at)
+        else:
+            chats = Bubblemate_chat.objects.filter(
+                Q(sender=bubble_friend_profile, receiver=Bubble_logged_in_user_profile, bubble_id=bubble) | 
+                Q(sender=Bubble_logged_in_user_profile, receiver=bubble_friend_profile,bubble_id=bubble)
+            ).order_by('created_at')
 
-    #bubble mate form
-    if request.method == 'POST':
+        chat_data = [{
+            "sender": chat.sender.user_id.username,
+            "message": chat.chat,
+            "created_at": chat.created_at.strftime("%Y-%m-%d %H:%M:%S")
+        } for chat in chats]
+
+        return JsonResponse({"chats": chat_data})
+    else:
+        # Handle non-AJAX requests here
+        pass
+
+def post_chat_bubble_mate(request, pk, username):
+    bubble = get_object_or_404(Bubble, pk=pk)
+    friend_profile = get_object_or_404(User, username=username)
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         form = BubbleMateChatForm(request.POST)
         if form.is_valid():
-            bubble_mate_chat = form.save(commit=False)
-            bubble_mate_chat.bubble_id = bubble
-            bubble_mate_chat.sender = BubbleMember.objects.get(bubble_id=bubble, user_id=request.user )
-            bubble_mate_chat.receiver = BubbleMember.objects.get(bubble_id=bubble, user_id=friend_profile )
-            bubble_mate_chat.save()
-            form = BubbleMateChatForm()  # Clear the form after successful submission
-    else:
-        form = BubbleMateChatForm()
+            message = form.save(commit=False)
+            message.bubble_id = bubble
+            message.sender = BubbleMember.objects.get(bubble_id=bubble, user_id=request.user )
+            message.receiver = BubbleMember.objects.get(bubble_id=bubble, user_id=friend_profile )
+            message.save()
+            return JsonResponse({'status': 'success', 'message': message.chat })
+        else:
+            return JsonResponse({'status': 'error', 'errors': form.errors})
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'})
 
-    return render(request, 'core/bubble_mate_chat.html', {
-        'chat': chat,
-        'friend_profile': friend_profile,
-        'form': form,
-    })
+
+def swipe_view(request, target_user_id, action):
+    current_user = request.user
+    target_user = User.objects.get(pk=target_user_id)
+
+    # Attempt to get an existing friend record in either user1/user2 combination
+    try:
+        friend = Friend.objects.get(
+            (Q(user1=current_user) & Q(user2=target_user)) | 
+            (Q(user1=target_user) & Q(user2=current_user))
+        )
+        created = False
+    except Friend.DoesNotExist:
+        # Create a new friend record if none exists
+        friend = Friend(user1=current_user, user2=target_user, status1=Friend.PENDING, status2=Friend.PENDING)
+        friend.save()
+        created = True
+
+    if friend.user1 == current_user:
+    # Logic for swipe right
+        if action == 'right':
+            # If it's already pending, set to ACCEPTED, else set to PENDING
+            if friend.status1 == Friend.PENDING:
+                friend.status1 = Friend.ACCEPTED
+            elif friend.status1 == Friend.DECLINED:
+                friend.status1 = Friend.ACCEPTED
+            friend.save()
+
+        # Logic for swipe left
+        elif action == 'left':
+            # Set to DECLINED only if not already ACCEPTED
+            if friend.status1 == Friend.PENDING:
+                friend.status1 = Friend.DECLINED
+            if friend.status1 == Friend.ACCEPTED:
+                friend.status1 = Friend.DECLINED
+                friend.save()
+
+    elif friend.user2 == current_user:
+            # Logic for swipe right
+        if action == 'right':
+            # If it's already pending, set to ACCEPTED, else set to PENDING
+            if friend.status2 == Friend.PENDING:
+                friend.status2 = Friend.ACCEPTED
+            elif friend.status2 == Friend.DECLINED:
+                friend.status2 = Friend.ACCEPTED
+            friend.save()
+
+        # Logic for swipe left
+        elif action == 'left':
+            # Set to DECLINED only if not already ACCEPTED
+            if friend.status2 == Friend.PENDING:
+                friend.status2 = Friend.DECLINED
+            elif friend.status2 == Friend.ACCEPTED:
+                friend.status2 = Friend.DECLINED
+                friend.save()
+
+    return JsonResponse({'status': 'success'})
+
+
+
+
+
+
+from datetime import timedelta
+from django.utils import timezone
+from .task import Switch_voting
+
+def bubbleTimerStart(request, pk):
+    # Schedule the task to run in 48 hours
+    Switch_voting.apply_async((pk,), eta=timezone.now() + timedelta(hours=48))

@@ -48,10 +48,11 @@ function updateChat() {
             data.chats.forEach(function (message) {
                 // Check if the message sender is the friend
                 var bgColorClass = (message.sender === friendUsername) ? 'bg-blue-200' : 'bg-pink-200';
+                var textAlignClass = (message.sender !== friendUsername) ? 'text-right' : '';
 
-                chatList += '<div class="mb-4">' +
-                                '<h2 class="text-lg font-semibold">' + message.sender + '</h2>' +
-                                '<p class="' + bgColorClass + ' rounded-lg p-2">' + message.message + '</p>' +
+                chatList += '<div class="mb-4" >' +
+                                
+                                '<p class="' + bgColorClass + ' rounded-lg p-2 ' + textAlignClass + '">' + message.message + '</p>' +
                                 '<p class="text-sm italic text-gray-500">' + message.created_at + '</p>' +
                             '</div>';
             });

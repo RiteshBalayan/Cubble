@@ -11,7 +11,13 @@
                 <div class="flex justify-center mb-2">
                     <img src="{{   bubble.bubble_id.thumbnail.url   }}" alt="Bubble Image" class="w-24 h-24 object-cover rounded-lg">
                 </div>
-                <p class="text-center font-semibold">{{ bubble.bubble_id.name }}</p>
+                {% if bubble.bubble_id.status == '1' %}
+                <h1 class="text-3xl font-bold mb-6">{{ bubble.bubble_id.name }} <span class="text-green-500 italic text-sm">• Active</span></h1>
+                {% elif bubble.bubble_id.status == '2' %}
+                <h1 class="text-3xl font-bold mb-6">{{ bubble.bubble_id.name }} <span class="text-yellow-500 italic text-sm">• Voting</span></h1>
+                {% else %}
+                <h1 class="text-3xl font-bold mb-6">{{ bubble.bubble_id.name }} <span class="text-red-500 italic text-sm">• Archived</span></h1>
+                {% endif %}
             </a>
         {% empty %}
             <p>No bubbles found</p>

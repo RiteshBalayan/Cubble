@@ -78,9 +78,21 @@ class CommunityResponse(models.Model):
 
 
 class Friend(models.Model):
+    PENDING = 'pending'
+    ACCEPTED = 'accepted'
+    DECLINED = 'declined'
+
+    STATUS_CHOICES = [
+        (PENDING, 'Pending'),
+        (ACCEPTED, 'Accepted'),
+        (DECLINED, 'Declined'),
+    ]
     user1 = models.ForeignKey(User, related_name='friendship_user1', on_delete=models.CASCADE)
     user2 = models.ForeignKey(User, related_name='friendship_user2', on_delete=models.CASCADE)
     created_on = models.DateTimeField(auto_now_add=True)
+    status1 = models.CharField(max_length=10, choices=STATUS_CHOICES, default=PENDING)
+    status2 = models.CharField(max_length=10, choices=STATUS_CHOICES, default=PENDING)
+
     # You might want to add more fields related to the friendship, such as when it was established
     
     class Meta:
@@ -107,4 +119,47 @@ class Bubblemate_chat(models.Model):
 
     def __str__(self):
         return f"From {self.sender.user_id.username} to {self.receiver.user_id.username} at {self.created_at}"
+
+
+class EntryTest(models.Model):
+    STATE_CHOICES = [('active', 'Active'), ('archive', 'Archive')]
+    name = models.CharField(max_length=100)
+    state = models.CharField(max_length=7, choices=STATE_CHOICES, default='archive')
+    questions = models.ManyToManyField('Question', related_name='tests')
+
+    def __str__(self):
+        return f"{self.name}"
+
+class Question(models.Model):
+    text = models.TextField()
+    choices = models.ManyToManyField('Option', blank=True)
+
+    def __str__(self):
+        return f"{self.text}"
+
+
+class Option(models.Model):
+    text = models.TextField()
+
+    def __str__(self):
+        return f"{self.text}"
+
+class OptionResponse(models.Model):
+    tick = models.BooleanField(blank=True)
+    user = models.ForeignKey(User, related_name='user', on_delete=models.CASCADE)
+    option = models.ForeignKey(Option, related_name='OptionResponce_option', on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, related_name='OptionResponce_question', on_delete=models.CASCADE, null=True)
+    EntryTest = models.ForeignKey(EntryTest, related_name='OptionResponce_entrytest', on_delete=models.CASCADE, null=True)
+
+    def __str__(self):
+        return f"{self.user} responce to {self.EntryTest} | {self.question} | {self.option} "
+
+class Answer(models.Model):
+    text = models.TextField(blank=True)
+    user = models.ForeignKey(User, related_name='answer', on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, related_name='Answer_question', on_delete=models.CASCADE , null=True)
+    EntryTest = models.ForeignKey(EntryTest, related_name='Answer_entrytest', on_delete=models.CASCADE, null=True)
+
+    def __str__(self):
+        return f"{self.user} responce to {self.EntryTest} | {self.question}"
 

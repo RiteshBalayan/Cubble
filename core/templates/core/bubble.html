@@ -3,14 +3,26 @@
 {% block title %}{{ bubble.name }}{% endblock %}
 
 {% block content %}
+
+<!-- Include jQuery and your custom script -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
     <div class="max-w-3xl mx-auto mt-6 p-6 bg-gray-100 rounded-lg shadow-md">
-        <h1 class="text-3xl font-bold mb-6">{{ bubble.name }}</h1>
+
+        {% if bubble.status == '1' %}
+        <h1 class="text-3xl font-bold mb-6">{{ bubble.name }} <span class="text-green-500 italic text-sm">• Active</span></h1>
+        {% elif bubble.status == '2' %}
+        <h1 class="text-3xl font-bold mb-6">{{ bubble.name }} <span class="text-yellow-500 italic text-sm">• Voting</span></h1>
+        {% else %}
+        <h1 class="text-3xl font-bold mb-6">{{ bubble.name }} <span class="text-red-500 italic text-sm">• Archived</span></h1>
+        {% endif %}
 
         <h2 class="text-xl font-bold mb-4">Bubble Members</h2>
 
         <div class="flex flex-wrap gap-4 mb-6">
             {% for member in members_in_bubble %}
-                <a href="{% url 'core:bubble_mate_chat' pk=member.bubble_id.id username=member.user_id.username %}" target="_blank" class="inline-block">
+                <a href="{% url 'core:bubble_mate_chat' pk=member.bubble_id.id username=member.user_id.username %}" class="inline-block">
                     <div class="w-12 h-12 rounded-full flex items-center justify-center bg-blue-200 hover:bg-blue-300">
                         <span class="text-lg font-bold text-gray-800">{{ member.user_id.username|first|upper }}</span>
                     </div>
@@ -20,32 +32,229 @@
             {% endfor %}
         </div>
 
-        <h2 class="text-xl font-bold mb-4">Previous Community Chats</h2>
+        <h2 class="text-xl font-bold mb-4">Previous Community Post</h2>
+        <h1 class="text-red-800"> * Don't respond to these post here, go to post page to reply</h1>
+        <br>
 
         <div class="mb-6">
-            <ul>
-                {% for post in Community_Posts %}
-                    <li>
-                        <a href="{%  url 'core:bubble_post' pk=post.bubble_id.id  post_id=post.id %}" target="_blank" class="block py-3 px-4 bg-blue-50 rounded-md shadow-md hover:shadow-lg mb-3 transition duration-300">
-                            <p class="font-semibold">{{ post.title }}</p>
-                            <p class="text-gray-600">{{ post.message }}</p>
-                            <p class="text-sm text-gray-500">{{ post.created_on }}</p>
-                        </a>
-                    </li>
-                {% empty %}
-                    <li>No previous chats</li>
-                {% endfor %}
+            <!-- Chat Container -->
+            <ul id="post-container">
+                <!-- Chat messages will be loaded here by JavaScript -->
             </ul>
         </div>
 
-        <h2 class="text-xl font-bold mb-4">New Community Chat</h2>
+        {% if bubble.status == '1' %}
 
-        <form method="post" class="mb-6">
+        <h2 class="text-xl font-bold mb-4">New Community Post</h2>
+
+        <form id="comment-form" class="mb-6">
             {% csrf_token %}
             <input type="text" name="title" placeholder="Title" class="w-full rounded-lg border-gray-300 focus:border-blue-500 resize-none p-3 focus:outline-none mb-4" required>
             <textarea name="message" class="w-full rounded-lg border-gray-300 focus:border-blue-500 resize-none p-3 focus:outline-none" rows="4" placeholder="Type your message here..." required></textarea>
-            <button type="submit" class="mt-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg focus:outline-none transition duration-300">Send Message</button>
+            <button type="submit" class="mt-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg focus:outline-none transition duration-300">Start Post</button>
         </form>
+
+        {% elif bubble.status == '2' %}
+        <h2 class="text-xl font-bold mb-4">You can't start new conversation Now</h2>
+        <br>
+        <h2 class="text-xl font-bold mb-4">Let's swipe</h2>
+
+        {% for member in members_in_bubble %}
+            {% if member.user_id in user_friends %}
+            <div class="user-profile" data-user-id="{{member.user_id.id}}">
+                <div class="w-12 h-12 rounded-full flex items-center justify-center bg-blue-200 hover:bg-blue-300">
+                    <span class="text-lg font-bold text-gray-800">{{ member.user_id.username|first|upper }}</span>
+                </div>
+                <br>
+                <P>You are friend</P>
+                <br><br>
+    
+            {% elif member.user_id in user_friends_pending  %}
+            <div class="user-profile" data-user-id="{{member.user_id.id}}">
+                <div class="w-12 h-12 rounded-full flex items-center justify-center bg-blue-200 hover:bg-blue-300">
+                    <span class="text-lg font-bold text-gray-800">{{ member.user_id.username|first|upper }}</span>
+                </div>
+                <br>
+                <p> Friend request sent </p>
+                <br>
+                {% csrf_token %}
+                <button class="swipe-left bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full transition duration-300 ease-in-out "onclick="refreshPage()">
+                    Swipe Left
+                </button>
+                <button class="swipe-right bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full transition duration-300 ease-in-out"onclick="refreshPage()">
+                    Swipe Right
+                </button>
+            </div>
+            <br><br>
+            {% else  %}
+            <div class="user-profile" data-user-id="{{member.user_id.id}}">
+                <div class="w-12 h-12 rounded-full flex items-center justify-center bg-blue-200 hover:bg-blue-300">
+                    <span class="text-lg font-bold text-gray-800">{{ member.user_id.username|first|upper }}</span>
+                </div>
+                <br>
+                <p> Swipe right to send Request </p>
+                <br>
+                {% csrf_token %}
+                <button class="swipe-left bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full transition duration-300 ease-in-out "onclick="refreshPage()">
+                    Swipe Left
+                </button>
+                <button class="swipe-right bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full transition duration-300 ease-in-out"onclick="refreshPage()">
+                    Swipe Right
+                </button>
+            <br>
+            <br>
+            </div>
+            {% endif %}
+        {% endfor %}
+
+
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!--Java Script for swipe button -->
+    <script>
+        $(document).ready(function() {
+            $('.swipe-left, .swipe-right').click(function() {
+                var userId = $(this).closest('.user-profile').data('user-id');
+                var action = $(this).hasClass('swipe-left') ? 'left' : 'right';
+
+                handleSwipe(userId, action);
+            });
+        });
+
+function handleSwipe(userId, action, button) {
+    $.ajax({
+        url: `/swipe/${userId}/${action}/`,
+        method: 'POST',
+        headers: {"X-CSRFToken": "{{ csrf_token }}"},
+        success: function(response) {
+            // Change the color of the clicked button only
+            if (action === 'left') {
+                button.addClass('bg-red-800').removeClass('bg-red-500 hover:bg-red-700');
+            } else if (action === 'right') {
+                button.addClass('bg-green-800').removeClass('bg-green-500 hover:bg-green-700');
+            }
+        },
+        error: function() {
+            alert('Error processing swipe.');
+        }
+    });
+}
+
+function refreshPage() {
+        window.location.reload();
+    }
+    </script>
+
+
+<script>
+    $(document).ready(function() {
+        $('.swipe-left, .swipe-right').click(function() {
+            var userId = $(this).closest('.user-profile').data('user-id');
+            var action = $(this).hasClass('swipe-left') ? 'left' : 'right';
+            var button = $(this);
+
+            handleSwipe(userId, action, button);
+        });
+    });
+
+    function handleSwipe(userId, action, button) {
+        $.ajax({
+            url: `/swipe/${userId}/${action}/`,
+            method: 'POST',
+            headers: {"X-CSRFToken": "{{ csrf_token }}"},
+            success: function(response) {
+                // Change the button color based on the swipe action
+                if (action === 'left') {
+                    button.removeClass('bg-red-500 hover:bg-red-700').addClass('bg-red-800');
+                } else if (action === 'right') {
+                    button.removeClass('bg-green-500 hover:bg-green-700').addClass('bg-green-800');
+                }
+            },
+            error: function() {
+                alert('Error processing swipe.');
+            }
+        });
+    }
+</script>
+
+
+
+        {% else %}
+        <h2 class="text-xl font-bold mb-4">Archived Bubble</h2>
+        {% endif %}
+
+
+
+
     </div>
+
+<!-- JavaScript to fetch posts -->
+<script>
+    function updatePost() {
+        const bubbleId = '{{ bubble.id }}';
+    
+        $.ajax({
+            url: `/fetch-post/${bubbleId}`,
+            dataType: 'json',
+            success: function (data) {
+                const postList = data.posts.map(message => `
+                    <a href="/bubble/${bubbleId}/bubble_post/${message.post_id}/" class="block py-3 px-4 rounded-md shadow-md hover:shadow-lg mb-3 transition duration-300 bg-blue-50 hover:bg-blue-200">
+                        <p class="font-semibold">${message.title}</p>
+                        <p class="text-gray-600">${message.message}</p>
+                    </a>
+                `).join('');
+    
+                const postContainer = $('#post-container');
+                postContainer.html(postList || '<li>No Post found</li>');
+            }
+        });
+    }
+    
+    // Call updateChat function periodically, e.g., every 1 second
+    setInterval(updatePost, 1000);
+    
+    // Initial fetch when the page loads
+    $(document).ready(updatePost);
+    </script>
+    
+<!-- Java Script for submiting comments-->
+<script>
+    $(document).ready(function() {
+        $('#comment-form').on('submit', function(e) {
+            e.preventDefault();
+            var formData = $(this).serialize();
+    
+            // Get the CSRF token
+            var csrftoken = $('[name=csrfmiddlewaretoken]').val();
+    
+            $.ajax({
+                url: `/post-post/{{bubble.id}}/`, // Use the Django template variables
+                type: 'POST',
+                data: formData,
+                dataType: 'json',
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                },
+                success: function(data) {
+                    if (data.status === 'success') {
+                        // Handle success
+                        $('#comment-form')[0].reset();
+                    } else {
+                        // Handle form errors
+                    }
+                },
+                error: function(xhr, errmsg, err) {
+                    // Handle AJAX errors
+                }
+            });
+        });
+    });
+    </script>
+
+
+
+
+
 {% endblock %}
 
