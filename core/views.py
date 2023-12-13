@@ -9,7 +9,17 @@ from .forms import ProfileUpdateForm, MessageForm, CommunityChatForm, BubbleMate
 
 
 def home(request):
-    return render(request, 'core/home.html',)
+    entry_forum = EntryTest.objects.filter(state='active')
+    user_bubbles = BubbleMember.objects.filter(user_id=request.user.id)
+    active_bubbles = []
+    for bubble in user_bubbles:
+        bub = bubble.bubble_id
+        if bub.status=='1':
+            active_bubbles.append(bub)
+    return render(request, 'core/home.html',{
+        'entry_forum': entry_forum,
+        'active_bubbles': active_bubbles,
+    })
 
 def signup(request):
     if request.method == 'POST':
@@ -141,6 +151,16 @@ def post_message(request, friend_username):
             message.sender = request.user
             message.receiver = friend_profile
             message.save()
+
+            # Update or create the MessageNotification
+            notification, created = MessageNotification.objects.get_or_create(
+                receiver=friend_profile, sender=request.user, 
+                defaults={'unread_count': 1}
+            )
+            if not created:
+                notification.unread_count += 1
+                notification.save()
+
             return JsonResponse({'status': 'success', 'message': message.chat })
         else:
             return JsonResponse({'status': 'error', 'errors': form.errors})
@@ -431,6 +451,66 @@ def swipe_view(request, target_user_id, action):
 
     return JsonResponse({'status': 'success'})
 
+from .models import EntryTest
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
+@login_required
+def test_view(request, test_id):
+    test = get_object_or_404(EntryTest, id=test_id)
+    questions = test.questions.all()
+    paginator = Paginator(questions, 1)  # 1 question per page
+
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'core/test.html', {
+        'test': test,
+        'page_obj': page_obj,
+    })
+
+from django.http import JsonResponse
+from .models import OptionResponse, Option, Question
+from django.views.decorators.csrf import csrf_exempt
+
+@csrf_exempt
+def update_option_response(request):
+    if request.method == 'POST':
+        user_id = request.POST.get('user_id')
+        option_id = request.POST.get('option_id')  # This is actually the option name
+        tick = request.POST.get('tick') == 'true'
+        question_id = request.POST.get('question_id')
+        entry_test_id = request.POST.get('entry_test_id')
+
+        # Retrieve the actual objects based on the provided identifiers
+        user = get_object_or_404(User, pk=user_id)
+        option = get_object_or_404(Option, pk=option_id)  # Assuming 'name' is the unique identifier
+        question = get_object_or_404(Question, pk=question_id)
+        entry_test = get_object_or_404(EntryTest, pk=entry_test_id)
+
+        obj, created = OptionResponse.objects.update_or_create(
+            user=user, option=option, question=question, EntryTest=entry_test,
+            defaults={'tick': tick}
+        )
+        return JsonResponse({'success': True, 'created': created})
+    return JsonResponse({'success': False}, status=400)
+
+from .models import MessageNotification
+
+@login_required
+def get_message_count(request, sender_id):
+    receiver = request.user
+    try:
+        notification = MessageNotification.objects.get(receiver=receiver, sender_id=sender_id)
+    except MessageNotification.DoesNotExist:
+        notification = MessageNotification.objects.create(receiver=receiver, sender_id=sender_id)
+
+    return JsonResponse({'unread_count': notification.unread_count})
+
+@login_required
+def reset_message_count(request, sender_id):
+    receiver = request.user
+    MessageNotification.objects.filter(receiver=receiver, sender_id=sender_id).update(unread_count=0)
+    return JsonResponse({'status': 'success'})
 
 
 

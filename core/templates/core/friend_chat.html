@@ -106,7 +106,24 @@ $(document).ready(updateChat);
     });
     </script>
 
+<div id="message-count-box" style="color: red;" data-sender-id="{{ friend_profile.id }}">
+    <!-- The message count will be displayed here -->
+</div>
 
+<script>
+    function resetMessageCount(senderId) {
+        fetch(`/reset-message-count/${senderId}/`)
+            .then(response => response.json())
+            .then(data => console.log('Count reset:', data))
+            .catch(error => console.error('Error:', error));
+    }
+
+    const messageCountBox = document.getElementById('message-count-box');
+    const senderId = messageCountBox.getAttribute('data-sender-id');
+
+    resetMessageCount(senderId); // Call the function immediately when the page loads
+    setInterval(() => resetMessageCount(senderId), 10000); // Then call it every 10 seconds
+</script>
 
 
 {% endblock %}

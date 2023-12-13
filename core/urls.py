@@ -12,6 +12,8 @@ urlpatterns = [
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('profile/', views.user_profile, name='user_profile'),
     path('update-profile/', views.update_profile, name='update_profile'),
+    path('entrytest/<int:test_id>/', views.test_view, name='test_view'),
+    path('update_option_response/', views.update_option_response, name='update_option_response'), #json responce to questions
     path('mybubbles/', views.mybubbles, name='mybubbles'),
     path('myfriends/', views.myfriends, name='myfriends'),
     path('bubble/<int:pk>/', views.bubble, name='bubble'),
@@ -26,6 +28,10 @@ urlpatterns = [
     path('fetch_chat_bubble_mate/<int:pk>/<str:username>/', views.fetch_chat_bubble_mate, name='fetch_chat_bubble_mate'),
     path('post_chat_bubble_mate/<int:pk>/<str:username>/', views.post_chat_bubble_mate, name='post_chat_bubble_mate'),
     path('bubble/<int:pk>/bubble_post/<int:post_id>/', views.bubble_post, name='bubble_post'),
+
+    #Notifiation
+    path('get-message-count/<int:sender_id>/', views.get_message_count, name='get-message-count'),
+    path('reset-message-count/<int:sender_id>/', views.reset_message_count, name='reset-message-count'),
 
 
 

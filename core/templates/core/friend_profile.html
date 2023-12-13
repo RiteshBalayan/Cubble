@@ -36,4 +36,33 @@
 <br><br><br>
 <a href="{% url 'core:friend_chat' friend_username=friend_profile.username %}" class="bg-blue-500 text-white px-6 py-3 rounded-lg mt-6 hover:bg-blue-700">Chat</a>
 
+
+
+<div id="message-count-box" style="color: red;" data-sender-id="{{ friend_profile.id }}">
+    <!-- The message count will be displayed here -->
+</div>
+
+
+<script>
+
+function fetchMessageCount(senderId) {
+    fetch(`/get-message-count/${senderId}/`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('message-count-box').textContent = data.unread_count;
+        })
+        .catch(error => console.error('Error:', error));
+}
+
+const messageCountBox = document.getElementById('message-count-box');
+const senderId = messageCountBox.getAttribute('data-sender-id');
+
+// Initial fetch
+fetchMessageCount(senderId);
+setInterval(() => fetchMessageCount(senderId), 1000); // Fetch every 10 seconds
+
+
+
+</script>
+
 {% endblock %}

@@ -132,7 +132,7 @@ class EntryTest(models.Model):
 
 class Question(models.Model):
     text = models.TextField()
-    choices = models.ManyToManyField('Option', blank=True)
+    choices = models.ManyToManyField('Option', related_name='Question_option' ,blank=True)
 
     def __str__(self):
         return f"{self.text}"
@@ -163,3 +163,16 @@ class Answer(models.Model):
     def __str__(self):
         return f"{self.user} responce to {self.EntryTest} | {self.question}"
 
+
+class MessageNotification(models.Model):
+    receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sender')
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='receiver')
+    unread_count = models.IntegerField(default=0)
+    last_checked = models.DateTimeField(auto_now=True)
+
+class BubbleMessageNotification(models.Model):
+    bubble = models.ForeignKey(Bubble, on_delete=models.CASCADE)
+    receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bubble_sender')
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bubble_receiver')
+    unread_count = models.IntegerField(default=0)
+    last_checked = models.DateTimeField(auto_now=True)

@@ -1,16 +1,38 @@
 {% extends 'core/base.html' %}
 
 {% block content %}
-    {% if request.user.is_authenticated %}
-        <!-- User is logged in -->
-        <div class="text-center my-10">
-            <h1 class="text-4xl font-bold">Welcome back, {{ request.user.username }}!</h1>
-            <!-- Add fancy content or features for logged-in users -->
-            <p class="mt-4 text-lg">Enjoy our exclusive features and connect with amazing people!</p>
-            <br><br>
-            <a href="#" class="bg-blue-500 text-white px-6 py-3 rounded-lg mt-6 hover:bg-blue-700">Enter</a>
-            <!-- Add more fancy stuff for logged-in users -->
+{% if request.user.is_authenticated %}
+<!-- User is logged in -->
+<div class="text-center my-10">
+    <h1 class="text-4xl font-bold">Welcome back, {{ request.user.username }}!</h1>
+    <p class="mt-4 text-lg">Enjoy our exclusive features and connect with amazing people!</p>
+
+        <!-- Display User Bubbles -->
+        <div class="mt-6">
+            <h2 class="text-3xl font-bold">Your Active Bubbles</h2>
+            {% for bubble in active_bubbles %}
+                <div class="bg-gray-200 px-6 py-4 rounded-lg mt-4">
+                    <a href="{% url 'core:bubble' pk=bubble.id %}" class="text-xl font-semibold">{{ bubble.name }}</a>
+                </div>
+            {% empty %}
+                <p>You are not active in any bubbles.</p>
+            {% endfor %}
         </div>
+
+    <!-- Display Entry Forums -->
+    <div class="mt-6">
+        <h2 class="text-3xl font-bold">Active Entry Forums</h2>
+        {% for forum in entry_forum %}
+            <div class="bg-gray-200 px-6 py-4 rounded-lg mt-4">
+                <a href="{% url 'core:test_view' test_id=forum.id %}" class="text-xl font-semibold">{{ forum.name }}</a>
+            </div>
+        {% empty %}
+            <p>No active forums at the moment.</p>
+        {% endfor %}
+    </div>
+
+
+</div>
     {% else %}
         <!-- User is not logged in -->
         <div class="text-center my-10">

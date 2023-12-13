@@ -1,0 +1,78 @@
+{% extends 'core/base.html' %}
+
+{% block title %} Bubble Sign up {% endblock %}
+
+{% block content %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<div class="container mx-auto p-4">
+    <h1 class="text-xl font-bold mb-4">{{ test.name }}</h1>
+    <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        <!-- Display the question -->
+        <p class="text-gray-700 text-base">{{ page_obj.object_list.0.text }}</p>
+        {% if page_obj.object_list.0.choices %}
+        <ol class="list-decimal list-inside ml-6">
+            {% for option in page_obj.object_list.0.choices.all %}
+                <li class="mb-2">
+                    <p class="text-gray-700">{{ option }}</p>
+
+                    <input type="checkbox" class="optionTick" 
+                    id="option_{{ option.id }}" 
+                    data-user-id="{{ request.user.id }}"
+                    data-option-id="{{ option.id }}"
+                    data-question-id="{{ page_obj.object_list.0.id }}"
+                    data-entry-test-id="{{ test.id }}"
+                    {% if option.OptionResponce_option.tick %}checked{% endif %}>
+
+                </li>
+            {% endfor %}
+        </ol>
+        {% endif %}
+    </div>
+    <div class="flex justify-between items-center">
+        <!-- Pagination Controls -->
+        <span class="text-sm text-gray-600">
+            Question {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </span>
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                Previous
+            </a>
+        {% endif %}
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                Next
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function(){
+        $('.optionTick').change(function(){
+            var tick = $(this).is(':checked');
+            var user_id = $(this).data('user-id');
+            var option_id = $(this).data('option-id');
+            var question_id = $(this).data('question-id');
+            var entry_test_id = $(this).data('entry-test-id');
+
+            $.ajax({
+                url: '/update_option_response/' ,
+                type: 'POST',
+                data: {
+                    'user_id': user_id,
+                    'option_id': option_id,
+                    'tick': tick,
+                    'question_id': question_id,
+                    'entry_test_id': entry_test_id,
+                    'csrfmiddlewaretoken': '{{ csrf_token }}'
+                },
+                success: function(response) {
+                    console.log(response);
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}
