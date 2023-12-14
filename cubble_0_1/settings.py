@@ -75,10 +75,21 @@ WSGI_APPLICATION = 'cubble_0_1.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'cubble',
+        'USER': 'postgres',
+        'PASSWORD': 'Microsoft#100',
+        'HOST': 'cubble.cfeop1q7oqby.eu-north-1.rds.amazonaws.com',  
+        'PORT': '5432',  
     }
 }
 
