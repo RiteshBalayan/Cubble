@@ -1,0 +1,5 @@
+django = ""
+pillow
+postred
+psycopg2-binary
+psycopg2

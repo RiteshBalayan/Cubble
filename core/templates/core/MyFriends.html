@@ -9,7 +9,9 @@
         {% for friend in user_friends %}
             <a href="{% url 'core:friend_profile_view' friend_username=friend.username %}" class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition duration-300">
                 <div class="flex justify-center mb-2">
-                    <img src="{{ friend.Profile.profile_pic.url }}" alt="Profile Picture" class="w-16 h-16 rounded-full border-2 border-blue-500">
+                    {% if friend.Profile.profile_pic %}
+                        <img src="{{ friend.Profile.profile_pic.url }}" alt="Profile Picture" class="w-16 h-16 rounded-full border-2 border-blue-500">
+                    {% endif %}
                 </div>
                 <p class="text-center font-semibold">{{ friend.username }}</p>
             </a>
