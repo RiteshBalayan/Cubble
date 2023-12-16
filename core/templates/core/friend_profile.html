@@ -1,17 +1,31 @@
 {% extends 'core/base.html' %}
 
-{% block title %} {{friend_profile.username}}  {% endblock %}
+{% block title %} {{ friend_profile.username }}  {% endblock %}
 
 {% block content %}
 
-<div class="w-1/2 my-6 mx-auto p-6 bg-gray-100 rounded-xl">
+<!-- Chat Button and Message Counter -->
+<div class="flex justify-center my-4">
+    <div class="relative inline-block text-center">
+        <a href="{% url 'core:friend_chat' friend_username=friend_profile.username %}" class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-700 relative">Chat</a>
+        
+        <span class="absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full">
+            <div id="message-count-box" data-sender-id="{{ friend_profile.id }}">0</div>
+        </span>
+    </div>
+</div>
+
+<!-- Profile Details -->
+<div class="w-full lg:w-2/3 my-6 mx-auto p-6 bg-gray-100 rounded-xl">
     <h1 class="mb-4 text-3xl">Name: {{ friend_profile.username }}</h1>
     
+    <!-- Description -->
     <div class="mb-4">
         <h2 class="text-lg font-semibold mb-2">Description:</h2>
         <p>{{ friend_profile.Profile.description }}</p>
     </div>
     
+    <!-- Interests -->
     <div class="mb-4">
         <h3 class="text-lg font-semibold mb-2">Interests:</h3>
         <ul>
@@ -21,30 +35,17 @@
         </ul>
     </div>
     
-    <!-- Display profile picture if available -->
+    <!-- Profile Picture -->
     <div class="mb-4">
         <h3 class="text-lg font-semibold mb-2">Profile Picture:</h3>
         {% if friend_profile.Profile.profile_pic %}
             <img src="{{ friend_profile.Profile.profile_pic.url }}" alt="Profile Picture" class="w-40 h-auto rounded-lg">
         {% endif %}
     </div>
-
 </div>
-
-
-
-<br><br><br>
-<a href="{% url 'core:friend_chat' friend_username=friend_profile.username %}" class="bg-blue-500 text-white px-6 py-3 rounded-lg mt-6 hover:bg-blue-700">Chat</a>
-
-
-
-<div id="message-count-box" style="color: red;" data-sender-id="{{ friend_profile.id }}">
-    <!-- The message count will be displayed here -->
-</div>
-
 
 <script>
-
+// JavaScript for message count
 function fetchMessageCount(senderId) {
     fetch(`/get-message-count/${senderId}/`)
         .then(response => response.json())
@@ -59,10 +60,8 @@ const senderId = messageCountBox.getAttribute('data-sender-id');
 
 // Initial fetch
 fetchMessageCount(senderId);
-setInterval(() => fetchMessageCount(senderId), 1000); // Fetch every 10 seconds
-
-
-
+setInterval(() => fetchMessageCount(senderId), 10000); // Fetch every 10 seconds
 </script>
 
 {% endblock %}
+

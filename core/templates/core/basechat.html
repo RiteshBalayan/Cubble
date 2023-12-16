@@ -27,25 +27,23 @@
 </head>
 <body class="flex flex-col md:flex-row bg-white">
 
-    <!-- Sidebar / Bottom Navigation -->
-    <nav class="md:flex md:flex-col md:w-32 md:h-screen md:border-r border-gray-200 main-color fixed bottom-0 md:static w-full flex justify-around md:space-y-6 p-3 md:p-6 z-10 md:z-auto">
+    <!-- Sidebar / Bottom Navigation (Hidden on small screens) -->
+    <nav class="hidden md:flex md:flex-col md:w-32 md:h-screen md:border-r border-gray-200 main-color md:static md:space-y-6 p-3 md:p-6 z-10">
         <!-- Logo / Brand -->
-        <a href="/" class="md:text-xl font-semibold text-white hidden md:block"> Cubble </a>
+        <a href="/" class="text-xl font-semibold text-white">Cubble</a>
 
         <!-- Navigation Links -->
-        <div class="md:space-y-2 flex md:flex-col md:items-start space-x-6 md:space-x-0">
+        <div class="md:space-y-2 md:flex-col md:items-start">
             {% if request.user.is_authenticated %}
-            <div class="flex md:flex-col items-center md:items-start space-x-2 md:space-x-0 md:space-y-2">
-                <a href="{% url 'core:user_profile' %}" class="flex lg:flex-col items-center justify-center lg:space-x-0 lg:space-y-2">
-                    <!-- Hide Username on Mobile Screens -->
-                    <span class="hidden lg:block text-lg font-semibold text-white">{{ request.user.username }}</span>
+            <div class="md:flex-col md:items-start md:space-y-2">
+                <a href="{% url 'core:user_profile' %}" class="flex flex-col items-center justify-center md:space-y-2">
+                    <span class="text-lg font-semibold text-white">{{ request.user.username }}</span>
                     <div class="h-10 w-10 rounded-full overflow-hidden bg-gray-300">
                         {% if request.user.Profile.profile_pic %}
                         <img src="{{ request.user.Profile.profile_pic.url }}" alt="Profile Pic" class="h-full w-full object-cover">
                         {% endif %}
                     </div>
                 </a>
-                
                 
                 <a href="{% url 'core:myfriends' %}" class="px-6 py-3 text-lg font-semibold main-color text-white rounded-xl hover:bg-gray-700 main-color-hover">
                     <i class="fas fa-comments"></i> <!-- Friends icon -->
@@ -55,6 +53,7 @@
                     <i class="fas fa-users"></i> <!-- Chat icon -->
                 </a>
                 
+                <!-- Uncomment this for Logout Link -->
                 <!--
                 <a href="{% url 'core:logout' %}" class="px-6 py-3 text-lg font-semibold main-color text-white rounded-xl hover:bg-gray-700 main-color-hover">
                     <i class="fas fa-sign-out-alt"></i> 
@@ -79,16 +78,3 @@
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
