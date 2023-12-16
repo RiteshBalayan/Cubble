@@ -135,7 +135,12 @@ def fetch_comments(request, friend_username):
             "created_at": chat.created_at.strftime("%Y-%m-%d %H:%M:%S")
         } for chat in chats]
 
-        return JsonResponse({"chats": chat_data})
+        response = JsonResponse({"chats": chat_data})
+        response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response['Pragma'] = 'no-cache'
+        response['Expires'] = '0'
+
+        return response
     else:
         # Handle non-AJAX requests here
         pass
