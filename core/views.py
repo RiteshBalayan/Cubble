@@ -275,7 +275,11 @@ def fetch_post(request, pk):
             "post_id": Community_Post.id
         } for Community_Post in Community_Posts]
 
-        return JsonResponse({"posts": post_data})
+        response = JsonResponse({"posts": post_data})
+        response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response['Pragma'] = 'no-cache'
+        response['Expires'] = '0'
+        return response
     else:
         # Handle non-AJAX requests here
         pass
@@ -377,7 +381,11 @@ def fetch_chat_bubble_mate(request, pk, username):
             "created_at": chat.created_at.strftime("%Y-%m-%d %H:%M:%S")
         } for chat in chats]
 
-        return JsonResponse({"chats": chat_data})
+        response = JsonResponse({"chats": chat_data})
+        response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response['Pragma'] = 'no-cache'
+        response['Expires'] = '0'
+        return response
     else:
         # Handle non-AJAX requests here
         pass
