@@ -10,7 +10,7 @@
     <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
         <!-- Display the question -->
         <p class="text-gray-700 text-base">{{ page_obj.object_list.0.text }}</p>
-        {% if page_obj.object_list.0.choices %}
+        {% if page_obj.object_list.0.choices.exists %}
         <ol class="list-decimal list-inside ml-6">
             {% for option in page_obj.object_list.0.choices.all %}
                 <li class="mb-2">
@@ -23,11 +23,26 @@
                     data-question-id="{{ page_obj.object_list.0.id }}"
                     data-entry-test-id="{{ test.id }}"
                     {% if option.OptionResponce_option.tick %}checked{% endif %}>
-
                 </li>
-            {% endfor %}
+                {% endfor %}
         </ol>
+        <div id="choisesaved" class="text-green"></div>
+        {% else %}
+
+    <!-- Answer Form -->
+        <form id="answerForm" method="post" data-question-id="{{ page_obj.object_list.0.id }}" data-entrytest-id="{{ test.id }}" class="space-y-4">
+            {% csrf_token %}
+            <textarea name="text" id="answerText" 
+                class="w-full h-32 p-4 text-lg border-2 border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition duration-300 ease-in-out"
+                placeholder="Your answer here...">{{ answer.text }}</textarea>
+            <button type="submit" 
+                class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out">
+                Submit
+            </button>
+        </form>
+        <div id="result" class="text-green"></div>
         {% endif %}
+
     </div>
     <div class="flex justify-between items-center">
         <!-- Pagination Controls -->
@@ -51,7 +66,7 @@
     </div>
 </div>
 
-
+<!--JS for options tick -->
 <script>
     $(document).ready(function(){
         $('.optionTick').change(function(){
@@ -74,9 +89,43 @@
                 },
                 success: function(response) {
                     console.log(response);
+                    $("#choisesaved").html("Choice saved successfully.");
                 }
             });
         });
     });
+</script>
+
+<!-- JS for answer type-->
+<script>
+
+$(document).ready(function() {
+    $("#answerForm").submit(function(e) {
+        e.preventDefault();
+
+        const form = $(this);
+        const questionId = form.data('question-id');
+        const entryTestId = form.data('entrytest-id');
+
+        $.ajax({
+            type: "POST",
+            url: "/answer_question/",
+            data: {
+                csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+                text: $('#answerText').val(),
+                question_id: questionId,
+                entrytest_id: entryTestId
+            },
+            success: function(response) {
+                $("#result").html("Answer saved successfully.");
+            },
+            error: function(response) {
+                $("#result").html("Error saving answer.");
+            }
+        });
+    });
+});
+
+
 </script>
 {% endblock %}

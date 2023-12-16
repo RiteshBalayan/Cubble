@@ -507,6 +507,35 @@ def update_option_response(request):
         return JsonResponse({'success': True, 'created': created})
     return JsonResponse({'success': False}, status=400)
 
+
+
+from .models import Answer, Question, EntryTest
+from .forms import AnswerForm
+
+@csrf_exempt
+def answer_question(request):
+    if request.method == 'POST':
+        user = request.user
+        question_id = request.POST.get('question_id')
+        entrytest_id = request.POST.get('entrytest_id')
+        text = request.POST.get('text')
+
+        question = get_object_or_404(Question, pk=question_id)
+        entry_test = get_object_or_404(EntryTest, pk=entrytest_id)
+
+        answer, created = Answer.objects.get_or_create(
+            user=user, question=question, EntryTest=entry_test,
+            defaults={'text': text}
+        )
+        if not created:
+            answer.text = text
+            answer.save()
+
+        return JsonResponse({'status': 'success'})
+    return JsonResponse({'status': 'error'}, status=400)
+
+
+
 from .models import MessageNotification
 
 @login_required
@@ -524,6 +553,7 @@ def reset_message_count(request, sender_id):
     receiver = request.user
     MessageNotification.objects.filter(receiver=receiver, sender_id=sender_id).update(unread_count=0)
     return JsonResponse({'status': 'success'})
+
 
 
 

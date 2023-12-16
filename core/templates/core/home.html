@@ -4,12 +4,29 @@
 {% if request.user.is_authenticated %}
 <!-- User is logged in -->
 <div class="text-center my-10">
-    <h1 class="text-4xl font-bold">Welcome back, {{ request.user.username }}!</h1>
+    <h1 class="text-4xl font-bold text-main-color">Welcome back, {{ request.user.username }}!</h1>
     <p class="mt-4 text-lg">Enjoy our exclusive features and connect with amazing people!</p>
+<!--
+    <ul class="space-y-2 mt-4 text-lg pl-0 list-none">
+        <li>
+            Please be nice and kind to other users. This goes without saying but we want this to be a safe space for all.
+        </li>
+        <li>
+            Please be appropriate at all times, you can have fun and have a laugh (we strongly encouraage this) but don't push for offline meetups because your safety is our first priority.
+        </li>
+        <li>
+            Enjoy chatting, and be able to bring a better version of the app to you.
+        </li>
+        
+    </ul>
+-->
+    
+    
+
 
         <!-- Display User Bubbles -->
         <div class="mt-6">
-            <h2 class="text-3xl font-bold">Your Active Bubbles</h2>
+            <h2 class="text-3xl font-bold text-main-color">Your Active Bubbles</h2>
             {% for bubble in active_bubbles %}
                 <div class="bg-gray-200 px-6 py-4 rounded-lg mt-4">
                     <a href="{% url 'core:bubble' pk=bubble.id %}" class="text-xl font-semibold">{{ bubble.name }}</a>
@@ -21,15 +38,19 @@
 
     <!-- Display Entry Forums -->
     <div class="mt-6">
-        <h2 class="text-3xl font-bold">Active Entry Forums</h2>
-        {% for forum in entry_forum %}
-            <div class="bg-gray-200 px-6 py-4 rounded-lg mt-4">
-                <a href="{% url 'core:test_view' test_id=forum.id %}" class="text-xl font-semibold">{{ forum.name }}</a>
-            </div>
-        {% empty %}
-            <p>No active forums at the moment.</p>
-        {% endfor %}
+    <h2 class="text-3xl font-bold text-main-color">Active Entry Forums</h2>
+    {% for forum in entry_forum %}
+    <div class="bg-gray-200 px-6 py-4 rounded-lg mt-4 cursor-pointer" onclick="location.href='{% url 'core:test_view' test_id=forum.id %}';">
+        <span class="text-3xl font-semibold text-green-500">{{ forum.name }}</span>
+        <br>
+        <span>Answer few questions so that we can match you with the right bubble</span>
     </div>
+        
+    </div>
+    
+    {% empty %}
+            <p>No active forums at the moment.</p>
+    {% endfor %}
 
 
 </div>

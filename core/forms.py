@@ -65,3 +65,10 @@ class BubblePostResponseForm(forms.ModelForm):
     class Meta:
         model = CommunityResponse
         fields = ['message']
+
+from .models import Answer
+
+class AnswerForm(forms.ModelForm):
+    class Meta:
+        model = Answer
+        fields = ['text']

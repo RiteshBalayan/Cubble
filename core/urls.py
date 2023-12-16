@@ -12,8 +12,13 @@ urlpatterns = [
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('profile/', views.user_profile, name='user_profile'),
     path('update-profile/', views.update_profile, name='update_profile'),
+
+    #bubble entry questions
     path('entrytest/<int:test_id>/', views.test_view, name='test_view'),
     path('update_option_response/', views.update_option_response, name='update_option_response'), #json responce to questions
+    path('answer_question/', views.answer_question, name='answer_question'),
+
+    #core pages
     path('mybubbles/', views.mybubbles, name='mybubbles'),
     path('myfriends/', views.myfriends, name='myfriends'),
     path('bubble/<int:pk>/', views.bubble, name='bubble'),
