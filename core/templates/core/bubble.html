@@ -28,7 +28,7 @@
                             <span class="text-lg font-bold text-gray-800">{{ member.user_id.username|first|upper }}</span>
                         </div>
                         <span class="absolute top-0 right-0 z-10 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full">
-                            <div id="message-count-box" data-sender-id="{{ member.user_id.id }}" data-bubble-id="{{bubble.id}}">0</div>
+                            <div class="message-count-box" data-sender-id="{{ member.user_id.id }}" data-bubble-id="{{bubble.id}}">0</div>
                         </span>
                     </div>
                 </a>
@@ -260,23 +260,27 @@
 
 <!-- JavaScript for message count matechat-->
 <script>
-        
-        function fetchMessageCount(senderId,bubbleID) {
+    function fetchMessageCounts() {
+        const messageCountBoxes = document.querySelectorAll('.message-count-box');
+
+        messageCountBoxes.forEach(box => {
+            const senderId = box.getAttribute('data-sender-id');
+            const bubbleID = box.getAttribute('data-bubble-id');
+
             fetch(`/get-bubble-message-count/${senderId}/${bubbleID}`)
                 .then(response => response.json())
                 .then(data => {
-                    document.getElementById('message-count-box').textContent = data.unread_count;
+                    box.textContent = data.unread_count;
                 })
                 .catch(error => console.error('Error:', error));
-        }
-        
-        const messageCountBox = document.getElementById('message-count-box');
-        const senderId = messageCountBox.getAttribute('data-sender-id');
-        const bubbleID = messageCountBox.getAttribute('data-bubble-id');
-        // Initial fetch
-        fetchMessageCount(senderId);
-        setInterval(() => fetchMessageCount(senderId,bubbleID), 10000); // Fetch every 10 seconds
-    </script>
+        });
+    }
+
+    // Initial fetch
+    fetchMessageCounts();
+    setInterval(fetchMessageCounts, 10000); // Fetch every 10 seconds
+</script>
+
 
 
 

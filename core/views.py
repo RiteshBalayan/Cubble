@@ -636,15 +636,16 @@ def reset_message_count(request, sender_id):
     return JsonResponse({'status': 'success'})
 
 
-from .models import BubbleMessageNotification
+from core.models import BubbleMessageNotification
 
+@login_required
 def get_bubble_message_count(request, sender_id, pk):
     receiver = request.user
     bubble = Bubble.objects.get(pk=pk)
     try:
-        notification = BubbleMessageNotification.objects.get(receiver=receiver, sender_id=sender_id, bubble=bubble)
-    except MessageNotification.DoesNotExist:
-        notification = BubbleMessageNotification.objects.create(receiver=receiver, sender_id=sender_id, bubble=bubble)
+        notification = BubbleMessageNotification.objects.get(bubble=bubble, receiver=receiver, sender_id=sender_id)
+    except BubbleMessageNotification.DoesNotExist:
+        notification = BubbleMessageNotification.objects.create(bubble=bubble, receiver=receiver, sender_id=sender_id)
 
     return JsonResponse({'unread_count': notification.unread_count})
 

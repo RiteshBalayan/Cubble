@@ -176,7 +176,7 @@ class MessageNotification(models.Model):
     last_checked = models.DateTimeField(auto_now=True)
 
 class BubbleMessageNotification(models.Model):
-    bubble = models.ForeignKey(Bubble, on_delete=models.CASCADE)
+    bubble = models.ForeignKey(Bubble, on_delete=models.CASCADE, related_name='bubble_bubble')
     receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bubble_sender')
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bubble_receiver')
     unread_count = models.IntegerField(default=0)
