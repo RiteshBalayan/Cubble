@@ -4,7 +4,7 @@
 {% if request.user.is_authenticated %}
 <!-- User is logged in -->
 <div class="text-center my-10">
-    <h1 class="text-4xl font-bold text-main-color">Welcome back, {{ request.user.username }}!</h1>
+    <h1 class="text-4xl font-bold text-main-color underline">Welcome back, {{ request.user.username }}!</h1>
     <p class="mt-4 text-lg">Enjoy our exclusive features and connect with amazing people!</p>
 <!--
     <ul class="space-y-2 mt-4 text-lg pl-0 list-none">
@@ -25,32 +25,34 @@
 
 
         <!-- Display User Bubbles -->
+        <br><br><br>
         <div class="mt-6">
-            <h2 class="text-3xl font-bold text-main-color">Your Active Bubbles</h2>
+            <h2 class="text-3xl font-bold text-main-color underline">Your Active Bubbles</h2>
+            <br><br>
             {% for bubble in active_bubbles %}
                 <div class="bg-gray-200 px-6 py-4 rounded-lg mt-4">
                     <a href="{% url 'core:bubble' pk=bubble.id %}" class="text-xl font-semibold">{{ bubble.name }}</a>
                 </div>
             {% empty %}
-                <p>You are not active in any bubbles.</p>
+                <p class="text-xl font-semibold text-red-500">You are not active in any bubbles.</p>
             {% endfor %}
         </div>
 
     <!-- Display Entry Forums -->
     <div class="mt-6">
-    <h2 class="text-3xl font-bold text-main-color">Active Entry Forums</h2>
-    {% for forum in entry_forum %}
-    <div class="bg-gray-200 px-6 py-4 rounded-lg mt-4 cursor-pointer" onclick="location.href='{% url 'core:test_view' test_id=forum.id %}';">
-        <span class="text-3xl font-semibold text-green-500">{{ forum.name }}</span>
-        <br>
-        <span>Answer few questions so that we can match you with the right bubble</span>
+    <br><br><br>
+    <h2 class="text-3xl font-bold text-main-color underline">Active Entry Forums</h2>
+    <br><br>
+        {% if test_submit.Submit == True %}
+            <p class="text-xl font-semibold text-green-500"> Be patient you have applied to {{ entry_forum.name }}. we match you with amazing people soon.{{test_submit.Submit}}</p>
+        {% else %}
+            <div class="bg-gray-200 px-6 py-4 rounded-lg mt-4 cursor-pointer" onclick="location.href='{% url 'core:test_view' test_id=entry_forum.id %}';">
+                <span class="text-3xl font-semibold text-green-500">{{ entry_forum.name }}</span>
+                <br>
+                <span>Answer few questions so that we can match you with the right bubble {{test_submit.Submit}}</span>
+            </div>
+        {% endif %}
     </div>
-        
-    </div>
-    
-    {% empty %}
-            <p>No active forums at the moment.</p>
-    {% endfor %}
 
 
 </div>

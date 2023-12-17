@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import CommunityChat, CommunityResponse, Profile, Bubble, BubbleMember, Friend, Message, Bubblemate_chat, ProfileTag
+from .models import CommunityChat, CommunityResponse, Profile, Bubble, BubbleMember, Friend, Message, Bubblemate_chat, ProfileTag, EntryTestSubmit
 
 
 admin.site.register(CommunityChat)
@@ -11,6 +11,7 @@ admin.site.register(Friend)
 admin.site.register(Message)
 admin.site.register(Bubblemate_chat)
 admin.site.register(ProfileTag)
+admin.site.register(EntryTestSubmit)
 
 from .models import EntryTest, Question, Option, OptionResponse, Answer, MessageNotification
 

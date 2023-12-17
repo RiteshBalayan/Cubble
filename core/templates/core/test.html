@@ -26,7 +26,7 @@
                 </li>
                 {% endfor %}
         </ol>
-        <div id="choisesaved" class="text-green"></div>
+        <div id="choisesaved" class="text-green-500"></div>
         {% else %}
 
     <!-- Answer Form -->
@@ -40,7 +40,7 @@
                 Submit
             </button>
         </form>
-        <div id="result" class="text-green"></div>
+        <div id="result" class="text-green-500"></div>
         {% endif %}
 
     </div>
@@ -59,9 +59,12 @@
                 Next
             </a>
         {% else %}
-            <a href="{% url 'core:index' %}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-                Submit
-            </a>
+        <!--On Last Page submit button-->
+
+        <form method="post" action="{% url 'core:submit_entry_test' test.id %}">
+            {% csrf_token %}
+            <button type="submit" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">Submit</button>
+        </form>
         {% endif %}
     </div>
 </div>

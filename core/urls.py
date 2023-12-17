@@ -17,6 +17,7 @@ urlpatterns = [
     path('entrytest/<int:test_id>/', views.test_view, name='test_view'),
     path('update_option_response/', views.update_option_response, name='update_option_response'), #json responce to questions
     path('answer_question/', views.answer_question, name='answer_question'),
+    path('submit-entry-test/<int:entry_test_id>/', views.submit_entry_test, name='submit_entry_test'),
 
     #core pages
     path('mybubbles/', views.mybubbles, name='mybubbles'),

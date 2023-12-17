@@ -3,13 +3,22 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login
 from .forms import SignupForm
 from django.contrib.auth.decorators import login_required
-from core.models import BubbleMember, Bubble, Profile, CommunityChat, Bubblemate_chat, CommunityResponse
+from core.models import BubbleMember, Bubble, Profile, CommunityChat, Bubblemate_chat, CommunityResponse, EntryTestSubmit
 from django.contrib.auth.models import User
 from .forms import ProfileUpdateForm, MessageForm, CommunityChatForm, BubbleMateChatForm, BubblePostResponseForm
 
 
 def home(request):
-    entry_forum = EntryTest.objects.filter(state='active')
+    entry_forum = EntryTest.objects.filter(state='active').first()
+    # Check if entry_forum exists and user is authenticated
+    test_submit = False
+    if entry_forum and request.user.is_authenticated:
+        # Get or create the EntryTestSubmit object
+        test_submit, created = EntryTestSubmit.objects.get_or_create(
+            entryTest=entry_forum, 
+            user=request.user,
+            defaults={'Submit': False}  # You can set the default value for Submit here
+        )
     user_bubbles = BubbleMember.objects.filter(user_id=request.user.id)
     active_bubbles = []
     for bubble in user_bubbles:
@@ -18,6 +27,7 @@ def home(request):
             active_bubbles.append(bub)
     return render(request, 'core/home.html',{
         'entry_forum': entry_forum,
+        'test_submit': test_submit,
         'active_bubbles': active_bubbles,
     })
 
@@ -534,6 +544,29 @@ def answer_question(request):
         return JsonResponse({'status': 'success'})
     return JsonResponse({'status': 'error'}, status=400)
 
+from core.models import EntryTestSubmit
+
+@login_required
+def submit_entry_test(request, entry_test_id):
+    user = request.user
+    entry_test = EntryTest.objects.get(id=entry_test_id)
+    
+    if request.method == 'POST':
+        # This will either create a new instance or get the existing one
+        # This will either create a new instance or get the existing one
+        test_submit, created = EntryTestSubmit.objects.get_or_create(
+            user=user, 
+            entryTest=entry_test
+        )
+
+        # Set Submit to True regardless of whether the object was just created
+        test_submit.Submit = True
+        test_submit.save()
+
+
+        return redirect('/')  # Redirect to the home page
+
+    return redirect('/')
 
 
 from .models import MessageNotification

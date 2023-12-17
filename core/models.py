@@ -130,6 +130,11 @@ class EntryTest(models.Model):
     def __str__(self):
         return f"{self.name}"
 
+class EntryTestSubmit(models.Model):
+    user = models.ForeignKey(User, related_name='EntryTestSubmitUser', on_delete=models.CASCADE)
+    entryTest = models.ForeignKey(EntryTest, related_name='EntryTestSubmitEntryTest', on_delete=models.CASCADE)
+    Submit = models.BooleanField(default=False)
+
 class Question(models.Model):
     text = models.TextField()
     choices = models.ManyToManyField('Option', related_name='Question_option' ,blank=True)
