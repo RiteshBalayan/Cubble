@@ -345,6 +345,32 @@ def bubble_mate_chat(request, pk, username):
         'bubble':bubble,
     })
 
+
+@part_of_bubble_required
+def bubble_mate_chat_all(request, pk, username):
+    bubble = get_object_or_404(Bubble, pk=pk)
+    friend_profile = get_object_or_404(User, username=username)
+    logged_in_user_profile = request.user
+    bubble_friend_profile = BubbleMember.objects.get(bubble_id=bubble, user_id=friend_profile )
+    Bubble_logged_in_user_profile = BubbleMember.objects.get(bubble_id=bubble, user_id=logged_in_user_profile )
+
+    chats = Bubblemate_chat.objects.filter(
+                Q(sender=bubble_friend_profile, receiver=Bubble_logged_in_user_profile, bubble_id=bubble) | 
+                Q(sender=Bubble_logged_in_user_profile, receiver=bubble_friend_profile,bubble_id=bubble)
+            ).order_by('-created_at')
+
+    return render(request, 'core/bubble_mate_chat_all.html', {
+        'bubble' : bubble,
+        'friend_profile': friend_profile,
+        'logged_in_user_profile': logged_in_user_profile,
+        'chats' : chats
+        
+        
+    })
+
+
+
+
 def fetch_chat_bubble_mate(request, pk, username):
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         bubble = get_object_or_404(Bubble, pk=pk)
@@ -400,6 +426,13 @@ def post_chat_bubble_mate(request, pk, username):
             message.receiver = BubbleMember.objects.get(bubble_id=bubble, user_id=friend_profile )
             message.save()
             # Update or create the MessageNotification
+            notification, created = BubbleMessageNotification.objects.get_or_create(
+                bubble=bubble, receiver=friend_profile, sender=request.user, 
+                defaults={'unread_count': 1}
+            )
+            if not created:
+                notification.unread_count += 1
+                notification.save()
 
             return JsonResponse({'status': 'success', 'message': message.chat })
         else:

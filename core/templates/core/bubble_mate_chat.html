@@ -9,11 +9,20 @@
 
 
     <div class="max-w-lg mx-auto mt-6">
-        <h1 class="text-2xl font-bold mb-4">Chat with 
-            <div class="w-12 h-12 rounded-full flex items-center justify-center bg-blue-200 hover:bg-blue-300">
-                <span class="text-lg font-bold text-gray-800">{{ friend_profile.username|first|upper }}</span>
+        <div class="flex items-center justify-between mb-4"><!-- Adjusted flex container -->
+            <div class="flex items-center"> <!-- Nested flex container for left-aligned items -->
+                <a href="{% url 'core:bubble' pk=bubble.id %}" class="bg-transparent hover:bg-gray-200 text-blue-500 font-bold py-2 px-4 rounded-lg focus:outline-none mr-4">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <h1 class="text-2xl font-bold mr-4">Chat with</h1>
+                <div class="w-12 h-12 rounded-full flex items-center justify-center bg-blue-200 hover:bg-blue-300">
+                    <span class="text-lg font-bold text-gray-800">{{ friend_profile.username|first|upper }}</span>
+                </div>
             </div>
-        </h1>
+            <a href="{% url 'core:bubble_mate_chat_all' pk=bubble.id username=friend_profile.username %}" class="underline text-blue-500">Previous Chats</a>
+        </div>
+        
+        
 
         <!-- Existing messages -->
         <ul id="chat-container">
@@ -71,7 +80,7 @@
     
     // Initial fetch when the page loads
     $(document).ready(updateChat);
-    </script>
+</script>
 
 
 <!-- Java Script for submiting comments-->
@@ -108,7 +117,27 @@
             });
         });
     });
-    </script>
+</script>
 
+<div id="message-count-box" style="color: red;" data-sender-id="{{ friend_profile.id }}" data-bubble-id="{{bubble.id}}">
+    <!-- This function will invoke to tell DB that messege has been received-->
+</div>
+
+<!--JS to reset message Counter-->
+<script>
+    function resetMessageCount(senderId,bubbleID) {
+        fetch(`/reset-bubble-message-count/${senderId}/${bubbleID}/`)
+            .then(response => response.json())
+            .then(data => console.log('Count reset:', data))
+            .catch(error => console.error('Error:', error));
+    }
+
+    const messageCountBox = document.getElementById('message-count-box');
+    const senderId = messageCountBox.getAttribute('data-sender-id');
+    const bubbleID = messageCountBox.getAttribute('data-bubble-id');
+
+    resetMessageCount(senderId,bubbleID); // Call the function immediately when the page loads
+    setInterval(() => resetMessageCount(senderId,bubbleID), 10000); // Then call it every 10 seconds
+</script>
 
 {% endblock %}

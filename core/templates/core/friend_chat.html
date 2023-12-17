@@ -10,33 +10,29 @@
 
 <div class="max-w-lg mx-auto mt-6">
 <!-- Back Button with Icon -->
-<div class="flex items-center justify-between mt-4 mb-6 mx-auto w-full">
-    <div class="flex items-center">
-        <a href="{% url 'core:friend_profile_view' friend_username=friend_username %}" class="inline-block bg-transparent hover:bg-gray-200 text-blue-500 font-bold py-2 px-4 rounded-lg focus:outline-none mr-4">
-            <i class="fas fa-arrow-left"></i>
-        </a>
-        <h1 class="text-2xl font-bold">Chat with <span class="text-blue-500">{{ friend_profile.username }}</span></h1>
+    <div class="flex items-center justify-between mt-4 mb-6 mx-auto w-full">
+        <div class="flex items-center">
+            <a href="{% url 'core:friend_profile_view' friend_username=friend_username %}" class="inline-block bg-transparent hover:bg-gray-200 text-blue-500 font-bold py-2 px-4 rounded-lg focus:outline-none mr-4">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <h1 class="text-2xl font-bold">Chat with <span class="text-blue-500">{{ friend_profile.username }}</span></h1>
+        </div>
+        <a href="{% url 'core:friend_chat_all' friend_username=friend_username %}" class="underline text-blue-500">Previous Chats</a>
     </div>
-    <a href="{% url 'core:friend_chat_all' friend_username=friend_username %}" class="underline text-blue-500">Previous Chats</a>
-</div>
 
- 
-
-        <!-- Existing messages -->
-    <!--Ajax chats fetch -->
-<!-- Chat Container -->
-<ul id="chat-container">
-    <!-- Chat messages will be loaded here by JavaScript -->
-</ul>
+            <!-- Chat Container -->
+            <ul id="chat-container">
+                <!-- Chat messages will be loaded here by JavaScript -->
+            </ul>
 
         <!-- Form for sending messages -->
-<form id="comment-form">
-    {% csrf_token %}
-    <textarea name="chat" class="w-full rounded-lg border px-4 py-2 focus:outline-none focus:border-blue-500" placeholder="Type your message here..."></textarea>
-    <button type="submit" class="mt-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg focus:outline-none">Send Message</button>
-</form>
+        <form id="comment-form">
+            {% csrf_token %}
+            <textarea name="chat" class="w-full rounded-lg border px-4 py-2 focus:outline-none focus:border-blue-500" placeholder="Type your message here..."></textarea>
+            <button type="submit" class="mt-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg focus:outline-none">Send Message</button>
+        </form>
 
-    </div>
+</div>
 
 
 
@@ -118,9 +114,10 @@ $(document).ready(updateChat);
     </script>
 
 <div id="message-count-box" style="color: red;" data-sender-id="{{ friend_profile.id }}">
-    <!-- The message count will be displayed here -->
+    <!-- This function will invoke to tell DB that messege has been received-->
 </div>
 
+<!--JS to reset message Counter-->
 <script>
     function resetMessageCount(senderId) {
         fetch(`/reset-message-count/${senderId}/`)

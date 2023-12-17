@@ -41,6 +41,7 @@ urlpatterns = [
 
     #Bubble mate
     path('bubble/<int:pk>/mate_chat/<str:username>/', views.bubble_mate_chat, name='bubble_mate_chat'),
+    path('bubble/<int:pk>/mate_chat_all/<str:username>/', views.bubble_mate_chat_all, name='bubble_mate_chat_all'),
     path('fetch_chat_bubble_mate/<int:pk>/<str:username>/', views.fetch_chat_bubble_mate, name='fetch_chat_bubble_mate'),
     path('post_chat_bubble_mate/<int:pk>/<str:username>/', views.post_chat_bubble_mate, name='post_chat_bubble_mate'),
     
