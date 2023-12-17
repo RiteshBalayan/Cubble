@@ -3,3 +3,6 @@ pillow
 postred
 psycopg2-binary
 psycopg2
+gunicorn
+djando-storages
+bogo3

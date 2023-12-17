@@ -8,6 +8,9 @@
 
 <div class="max-w-lg mx-auto mt-6">
 
+    <a href="{% url 'core:bubble' pk=bubble.id %}" class="inline-block bg-transparent hover:bg-gray-200 text-blue-500 font-bold py-2 px-4 rounded-lg focus:outline-none mr-4">
+        <i class="fas fa-arrow-left"></i>
+    </a>
 
     <!-- Existing messages -->
 
@@ -18,33 +21,98 @@
             <div class="mb-6">
                 
                             
-                                <p class="font-semibold">{{ bubble_post.title }}</p>
-                                <p class="text-gray-600">{{ bubble_post.message }}</p>
-                                <p class="text-sm text-gray-500">{{ bubble_post.created_on }}</p>
+                                <p class="text-3xl font-semibold text-center">{{ bubble_post.title }}</p>
+                                <p class=" text-2xl bg-gray-200 rounded-lg text-center">{{ bubble_post.message }}</p>
+                                <p class="text-sm text-gray-500"> Community Post created by <strong>{{ bubble_post.user.user_id.username|slice:":1"}}</strong> at {{ bubble_post.created_on }}</p>
                             
     
             </div>
 
 
-            <ul>
-                {% for message in responses %}
-                    <div class="mb-4">
-                        <p class="bg-gray-200 rounded-lg p-2">{{ message.message }}</p>
-                        <p class="text-sm italic text-gray-500">{{ message.created_on }}</p>
-                    </div>
-                {% empty %}
-                    <li>No chat found</li>
-                {% endfor %}
+            <ul id="post-container">
+                <!-- Chat messages will be loaded here by JavaScript -->
             </ul>
 
     <!-- Form for sending messages -->
-    <form method="post" class="mt-6">
+    <form id="comment-form" class="mb-6">
         {% csrf_token %}
-        <textarea name="message" class="w-full rounded-lg border px-4 py-2 focus:outline-none focus:border-blue-500" placeholder="Type your message here..." required></textarea>
-        <button type="submit" class="mt-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg focus:outline-none">Send Message</button>
+        <textarea name="message" class="w-full rounded-lg border px-4 py-2 focus:outline-none focus:border-blue-500" placeholder="Type your response here..." required></textarea>
+        <button type="submit" class="mt-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg focus:outline-none transition duration-300">Respond</button>
     </form>
 </div>
 
 
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- JavaScript to fetch posts response -->
+<script>
+    function updatePost() {
+        const bubbleId = '{{ bubble.id }}';
+        const bubblepostID = '{{bubble_post.id}}';
+        const Username = '{{requestuser_secretname}}';
+
+        $.ajax({
+            url: `/bubble/${bubbleId}/bubble_post_fetch_response/${bubblepostID}`,
+            dataType: 'json',
+            success: function (data) {
+
+                const postList = data.posts.map(message => {
+                    var bgColorClass = (message.sender_id == Username) ? 'bg-pink-200' : 'bg-blue-200';
+                    var textAlignClass = (message.sender_id == Username) ? 'text-right' : '';
+
+                    return `
+                        <p class="text-sm italic text-gray-500 ${textAlignClass}">${message.sender}</p>
+                        <p class="rounded-lg p-2 ${bgColorClass} ${textAlignClass}">${message.message}</p>
+                        <p class="text-sm italic text-gray-500 ${textAlignClass}">${message.created_at}</p>
+                    `;
+                }).join('');
+
+                const postContainer = $('#post-container');
+                postContainer.html(postList || '<li>No Post found</li>');
+            }
+        });
+    }
+    
+    setInterval(updatePost, 1000);
+    $(document).ready(updatePost);
+</script>
+
+<!-- Java Script for submiting response-->
+<script>
+    $(document).ready(function() {
+        $('#comment-form').on('submit', function(e) {
+            e.preventDefault();
+            var formData = $(this).serialize();
+            const bubbleId = '{{ bubble.id }}';
+            const bubblepostID = '{{bubble_post.id}}';
+    
+            // Get the CSRF token
+            var csrftoken = $('[name=csrfmiddlewaretoken]').val();
+    
+            $.ajax({
+                url: `/bubble/${bubbleId}/bubble_post_post_response/${bubblepostID}/`, // Use the Django template variables
+                type: 'POST',
+                data: formData,
+                dataType: 'json',
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                },
+                success: function(data) {
+                    if (data.status === 'success') {
+                        // Handle success
+                        $('#comment-form')[0].reset();
+                    } else {
+                        // Handle form errors
+                    }
+                },
+                error: function(xhr, errmsg, err) {
+                    // Handle AJAX errors
+                }
+            });
+        });
+    });
+    </script>
 
 {% endblock %}

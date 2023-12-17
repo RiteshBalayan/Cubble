@@ -10,12 +10,16 @@
 
 <div class="max-w-lg mx-auto mt-6">
 <!-- Back Button with Icon -->
-<div class="flex items-center mt-4 mb-6 mx-auto">
-    <a href="{% url 'core:friend_profile_view' friend_username=friend_username %}" class="inline-block bg-transparent hover:bg-gray-200 text-blue-500 font-bold py-2 px-4 rounded-lg focus:outline-none mr-4">
-        <i class="fas fa-arrow-left"></i>
-    </a>
-    <h1 class="text-2xl font-bold">Chat with <span class="text-blue-500">{{ friend_profile.username }}</span></h1>
+<div class="flex items-center justify-between mt-4 mb-6 mx-auto w-full">
+    <div class="flex items-center">
+        <a href="{% url 'core:friend_profile_view' friend_username=friend_username %}" class="inline-block bg-transparent hover:bg-gray-200 text-blue-500 font-bold py-2 px-4 rounded-lg focus:outline-none mr-4">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <h1 class="text-2xl font-bold">Chat with <span class="text-blue-500">{{ friend_profile.username }}</span></h1>
+    </div>
+    <a href="{% url 'core:friend_chat_all' friend_username=friend_username %}" class="underline text-blue-500">Previous Chats</a>
 </div>
+
  
 
         <!-- Existing messages -->

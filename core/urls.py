@@ -22,18 +22,28 @@ urlpatterns = [
     #core pages
     path('mybubbles/', views.mybubbles, name='mybubbles'),
     path('myfriends/', views.myfriends, name='myfriends'),
+
+    #Bubbles
     path('bubble/<int:pk>/', views.bubble, name='bubble'),
     path('fetch-post/<int:pk>/', views.fetch_post, name='fetch_post'),
     path('post-post/<int:pk>/', views.post_post, name='post_post'),
-    path('friend_profile/<str:friend_username>/', views.friend_profile_view, name='friend_profile_view'),
     path('swipe/<int:target_user_id>/<str:action>/', views.swipe_view, name='swipe'),
+    path('bubble/<int:pk>/bubble_post/<int:post_id>/', views.bubble_post, name='bubble_post'),
+    path('bubble/<int:pk>/bubble_post_fetch_response/<int:post_id>/', views.fetch_post_response, name='fetch_post_response'),
+    path('bubble/<int:pk>/bubble_post_post_response/<int:post_id>/', views.post_post_response, name='post_post_response'),
+    
+    #Friends Chat
+    path('friend_profile/<str:friend_username>/', views.friend_profile_view, name='friend_profile_view'),
     path('friend_chat/<str:friend_username>/', views.friend_chat, name='friend_chat'),
+    path('friend_chat_all/<str:friend_username>/', views.friend_chat_all, name='friend_chat_all'),
     path('fetch-comments/<str:friend_username>/', views.fetch_comments, name='fetch_comments'),
     path('post-message/<str:friend_username>/', views.post_message, name='post_message'),
+
+    #Bubble mate
     path('bubble/<int:pk>/mate_chat/<str:username>/', views.bubble_mate_chat, name='bubble_mate_chat'),
     path('fetch_chat_bubble_mate/<int:pk>/<str:username>/', views.fetch_chat_bubble_mate, name='fetch_chat_bubble_mate'),
     path('post_chat_bubble_mate/<int:pk>/<str:username>/', views.post_chat_bubble_mate, name='post_chat_bubble_mate'),
-    path('bubble/<int:pk>/bubble_post/<int:post_id>/', views.bubble_post, name='bubble_post'),
+    
 
     #Notifiation
     path('get-message-count/<int:sender_id>/', views.get_message_count, name='get-message-count'),

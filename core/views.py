@@ -108,6 +108,25 @@ def friend_chat(request, friend_username):
         
     })
 
+@friend_required
+def friend_chat_all(request, friend_username):
+    friend_profile = get_object_or_404(User, username=friend_username)
+    friend_username = friend_username
+    logged_in_user_profile = request.user  # Assuming profile is linked to User
+    chats = Message.objects.filter(
+                Q(sender=friend_profile, receiver=logged_in_user_profile) |
+                Q(sender=logged_in_user_profile, receiver=friend_profile)
+            ).order_by('-created_at')
+
+    return render(request, 'core/friend_chat_all.html', {
+        'friend_profile': friend_profile,
+        'friend_username' : friend_username,
+        'logged_in_user_profile': logged_in_user_profile,
+        'chats' : chats
+        
+        
+    })
+
 from django.http import JsonResponse
 from django.db.models import Q
 from .models import Message
@@ -312,37 +331,6 @@ def post_post(request, pk):
 
 
 @part_of_bubble_required
-def bubble_post(request, pk, post_id):
-    bubble = get_object_or_404(Bubble, pk=pk)
-    logged_in_user_profile = request.user
-    bubble_post = get_object_or_404(CommunityChat, id=post_id)
-
-    #list of reponses to bubble post
-    responses = CommunityResponse.objects.filter(original_chat=bubble_post).order_by('created_on')
-
-    #response form
-    if request.method == 'POST':
-        form = BubblePostResponseForm(request.POST)
-        if form.is_valid():
-            community_response = form.save(commit=False)
-            community_response.original_chat = bubble_post
-            # Assuming BubbleMember is associated with the logged-in user
-            bubble_member = get_object_or_404(BubbleMember, bubble_id=bubble, user_id=request.user)
-            community_response.user = bubble_member
-            community_response.save()
-            form = BubblePostResponseForm()  # Clear the form after successful submission
-    else:
-        form = BubblePostResponseForm()
-
-    return render(request, 'core/bubble_post.html', {
-        'bubble_post' : bubble_post,
-        'form': form,
-        'responses': responses,
-    })
-
-
-
-@part_of_bubble_required
 def bubble_mate_chat(request, pk, username):
     bubble = get_object_or_404(Bubble, pk=pk)
     friend_profile = get_object_or_404(User, username=username)
@@ -412,6 +400,64 @@ def post_chat_bubble_mate(request, pk, username):
             message.receiver = BubbleMember.objects.get(bubble_id=bubble, user_id=friend_profile )
             message.save()
             return JsonResponse({'status': 'success', 'message': message.chat })
+        else:
+            return JsonResponse({'status': 'error', 'errors': form.errors})
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'})
+
+
+@part_of_bubble_required
+def bubble_post(request, pk, post_id):
+    bubble = get_object_or_404(Bubble, pk=pk)
+    logged_in_user_profile = request.user
+    bubble_post = get_object_or_404(CommunityChat, id=post_id)
+
+    requestuser_secretname = request.user.id
+    
+    return render(request, 'core/bubble_post.html', {
+        'requestuser_secretname': requestuser_secretname,
+        'bubble': bubble,
+        'bubble_post' : bubble_post,
+    })
+
+
+def fetch_post_response(request, pk, post_id):
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        bubble = get_object_or_404(Bubble, pk=pk)
+        bubble_post = get_object_or_404(CommunityChat, id=post_id)
+        Bubble_id = bubble.id
+
+        #list of reponses to bubble post
+        responses = CommunityResponse.objects.filter(original_chat=bubble_post).order_by('created_on')
+
+        post_data = [{
+            "sender": response.user.user_id.username[:1],
+            "sender_id": response.user.user_id.id,
+            "message": response.message,
+            "created_at": response.created_on.strftime("%Y-%m-%d %H:%M:%S"),
+            "post_id": response.id
+        } for response in responses]
+
+        response = JsonResponse({"posts": post_data})
+        response['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response['Pragma'] = 'no-cache'
+        response['Expires'] = '0'
+        return response
+    else:
+        # Handle non-AJAX requests here
+        pass
+
+def post_post_response(request, pk, post_id):
+    bubble = get_object_or_404(Bubble, pk=pk)
+    bubble_post = get_object_or_404(CommunityChat, id=post_id)
+    Bubble_id = bubble.id
+    if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        form = BubblePostResponseForm(request.POST)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.user = BubbleMember.objects.get(bubble_id=Bubble_id, user_id=request.user )
+            post.original_chat = bubble_post
+            post.save()
+            return JsonResponse({'status': 'success', 'message': post.message })
         else:
             return JsonResponse({'status': 'error', 'errors': form.errors})
     return JsonResponse({'status': 'error', 'message': 'Invalid request'})
