@@ -49,6 +49,9 @@ urlpatterns = [
     path('get-message-count/<int:sender_id>/', views.get_message_count, name='get-message-count'),
     path('reset-message-count/<int:sender_id>/', views.reset_message_count, name='reset-message-count'),
 
+    path('get-bubble-message-count/<int:sender_id>/<int:pk>/', views.get_bubble_message_count, name='get-bubble-message-count'),
+    path('reset-bubble-message-count/<int:sender_id>/<int:pk>/', views.reset_bubble_message_count, name='reset-bubble-message-count'),
+
 
 
     #path('', views.dashboard, name='dashboard'),

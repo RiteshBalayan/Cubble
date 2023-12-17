@@ -5,18 +5,46 @@
 {% block content %}
     <h3 class="text-2xl font-bold mb-4">My Friends</h3>
 
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {% for friend in user_friends %}
-            <a href="{% url 'core:friend_profile_view' friend_username=friend.username %}" class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition duration-300">
-                <div class="flex justify-center mb-2">
-                    {% if friend.Profile.profile_pic %}
-                        <img src="{{ friend.Profile.profile_pic.url }}" alt="Profile Picture" class="w-16 h-16 rounded-full border-2 border-blue-500">
-                    {% endif %}
-                </div>
-                <p class="text-center font-semibold">{{ friend.username }}</p>
-            </a>
-        {% empty %}
-            <p>No friends found</p>
-        {% endfor %}
-    </div>
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    {% for friend in user_friends %}
+    
+        <a href="{% url 'core:friend_profile_view' friend_username=friend.username %}" class="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition duration-300">
+            <div class="relative justify-center inline-block text-center">
+            <div class="flex justify-center mb-2">
+                {% if friend.Profile.profile_pic %}
+                    <img src="{{ friend.Profile.profile_pic.url }}" alt="Profile Picture" class="w-16 h-16 rounded-full border-2 border-blue-500">
+                {% endif %}
+            </div>
+
+        <span class="absolute top-0 right-0 z-10 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full">
+            <div id="message-count-box" data-sender-id="{{ friend.id }}">0</div>
+        </span>
+        </div>
+        <p class="text-center font-semibold">{{ friend.username }}</p>
+        </a>
+    {% empty %}
+        <p>No friends found</p>
+    {% endfor %}
+</div>
+
+
+
+    <script>
+        // JavaScript for message count
+        function fetchMessageCount(senderId) {
+            fetch(`/get-message-count/${senderId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('message-count-box').textContent = data.unread_count;
+                })
+                .catch(error => console.error('Error:', error));
+        }
+        
+        const messageCountBox = document.getElementById('message-count-box');
+        const senderId = messageCountBox.getAttribute('data-sender-id');
+        
+        // Initial fetch
+        fetchMessageCount(senderId);
+        setInterval(() => fetchMessageCount(senderId), 10000); // Fetch every 10 seconds
+    </script>
 {% endblock %}

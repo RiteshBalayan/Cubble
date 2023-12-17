@@ -23,8 +23,13 @@
         <div class="flex flex-wrap gap-4 mb-6">
             {% for member in members_in_bubble %}
                 <a href="{% url 'core:bubble_mate_chat' pk=member.bubble_id.id username=member.user_id.username %}" class="inline-block">
-                    <div class="w-12 h-12 rounded-full flex items-center justify-center bg-blue-200 hover:bg-blue-300">
-                        <span class="text-lg font-bold text-gray-800">{{ member.user_id.username|first|upper }}</span>
+                    <div class="relative justify-center inline-block text-center">
+                        <div class="w-12 h-12 rounded-full flex items-center justify-center bg-blue-200 hover:bg-blue-300">
+                            <span class="text-lg font-bold text-gray-800">{{ member.user_id.username|first|upper }}</span>
+                        </div>
+                        <span class="absolute top-0 right-0 z-10 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full">
+                            <div id="message-count-box" data-sender-id="{{ member.user_id.id }}" data-bubble-id="{{bubble.id}}">0</div>
+                        </span>
                     </div>
                 </a>
             {% empty %}
@@ -112,7 +117,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <!--Java Script for swipe button -->
-    <script>
+<script>
         $(document).ready(function() {
             $('.swipe-left, .swipe-right').click(function() {
                 var userId = $(this).closest('.user-profile').data('user-id');
@@ -122,29 +127,29 @@
             });
         });
 
-function handleSwipe(userId, action, button) {
-    $.ajax({
-        url: `/swipe/${userId}/${action}/`,
-        method: 'POST',
-        headers: {"X-CSRFToken": "{{ csrf_token }}"},
-        success: function(response) {
-            // Change the color of the clicked button only
-            if (action === 'left') {
-                button.addClass('bg-red-800').removeClass('bg-red-500 hover:bg-red-700');
-            } else if (action === 'right') {
-                button.addClass('bg-green-800').removeClass('bg-green-500 hover:bg-green-700');
+    function handleSwipe(userId, action, button) {
+        $.ajax({
+            url: `/swipe/${userId}/${action}/`,
+            method: 'POST',
+            headers: {"X-CSRFToken": "{{ csrf_token }}"},
+            success: function(response) {
+                // Change the color of the clicked button only
+                if (action === 'left') {
+                    button.addClass('bg-red-800').removeClass('bg-red-500 hover:bg-red-700');
+                } else if (action === 'right') {
+                    button.addClass('bg-green-800').removeClass('bg-green-500 hover:bg-green-700');
+                }
+            },
+            error: function() {
+                alert('Error processing swipe.');
             }
-        },
-        error: function() {
-            alert('Error processing swipe.');
-        }
-    });
-}
-
-function refreshPage() {
-        window.location.reload();
+        });
     }
-    </script>
+
+    function refreshPage() {
+            window.location.reload();
+        }
+</script>
 
 <!--
 <script>
@@ -253,6 +258,25 @@ function refreshPage() {
     });
     </script>
 
+<!-- JavaScript for message count matechat-->
+<script>
+        
+        function fetchMessageCount(senderId,bubbleID) {
+            fetch(`/get-bubble-message-count/${senderId}/${bubbleID}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('message-count-box').textContent = data.unread_count;
+                })
+                .catch(error => console.error('Error:', error));
+        }
+        
+        const messageCountBox = document.getElementById('message-count-box');
+        const senderId = messageCountBox.getAttribute('data-sender-id');
+        const bubbleID = messageCountBox.getAttribute('data-bubble-id');
+        // Initial fetch
+        fetchMessageCount(senderId);
+        setInterval(() => fetchMessageCount(senderId,bubbleID), 10000); // Fetch every 10 seconds
+    </script>
 
 
 

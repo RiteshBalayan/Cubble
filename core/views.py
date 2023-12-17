@@ -399,6 +399,8 @@ def post_chat_bubble_mate(request, pk, username):
             message.sender = BubbleMember.objects.get(bubble_id=bubble, user_id=request.user )
             message.receiver = BubbleMember.objects.get(bubble_id=bubble, user_id=friend_profile )
             message.save()
+            # Update or create the MessageNotification
+
             return JsonResponse({'status': 'success', 'message': message.chat })
         else:
             return JsonResponse({'status': 'error', 'errors': form.errors})
@@ -634,8 +636,23 @@ def reset_message_count(request, sender_id):
     return JsonResponse({'status': 'success'})
 
 
+from .models import BubbleMessageNotification
 
+def get_bubble_message_count(request, sender_id, pk):
+    receiver = request.user
+    bubble = Bubble.objects.get(pk=pk)
+    try:
+        notification = BubbleMessageNotification.objects.get(receiver=receiver, sender_id=sender_id, bubble=bubble)
+    except MessageNotification.DoesNotExist:
+        notification = BubbleMessageNotification.objects.create(receiver=receiver, sender_id=sender_id, bubble=bubble)
 
+    return JsonResponse({'unread_count': notification.unread_count})
+
+@login_required
+def reset_bubble_message_count(request, sender_id, pk):
+    receiver = request.user
+    BubbleMessageNotification.objects.filter(receiver=receiver, sender_id=sender_id, bubble=pk).update(unread_count=0)
+    return JsonResponse({'status': 'success'})
 
 
 from datetime import timedelta
