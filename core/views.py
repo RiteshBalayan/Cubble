@@ -561,7 +561,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 @login_required
 def test_view(request, test_id):
     test = get_object_or_404(EntryTest, id=test_id)
-    questions = test.questions.all()
+    questions = test.questions.order_by('id').all()
     paginator = Paginator(questions, 1)  # 1 question per page
 
     page_number = request.GET.get('page')
