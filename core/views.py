@@ -689,6 +689,11 @@ def reset_bubble_message_count(request, sender_id, pk):
     return JsonResponse({'status': 'success'})
 
 
+@login_required
+def get_bubble_post_responce_message_count(request, pk, post_id):
+    receiver = request.user
+    bubble = Bubble.objects.get(pk=pk)
+
 from datetime import timedelta
 from django.utils import timezone
 from .task import Switch_voting
