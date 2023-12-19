@@ -46,6 +46,7 @@ class ProfileTag(models.Model):
 class Profile(models.Model):
 
     user_id = models.OneToOneField(User, related_name='Profile', on_delete=models.CASCADE)
+    name = models.CharField(max_length = 100, blank=True)
     description = models.CharField(max_length = 500, blank=True)
     interests = models.ManyToManyField(ProfileTag, blank=True)
     profile_pic = models.ImageField(upload_to='profil_pic', blank=True)

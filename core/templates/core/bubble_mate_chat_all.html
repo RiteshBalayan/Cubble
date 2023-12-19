@@ -9,7 +9,7 @@
                 <a href="{% url 'core:bubble_mate_chat' pk=bubble.id username=friend_profile.username %}" class="inline-block bg-transparent hover:bg-gray-200 text-blue-500 font-bold py-2 px-4 rounded-lg focus:outline-none mr-4">
                     <i class="fas fa-arrow-left"></i>
                 </a>
-                <h1 class="text-2xl font-bold">Chat with <span class="text-blue-500">{{ friend_profile.username }}</span></h1>
+                <h1 class="text-2xl font-bold">Chat with <span class="text-blue-500">{{ friend_profile.Profile.name }}</span></h1>
             </div>
 
             <ul>

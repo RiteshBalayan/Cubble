@@ -6,6 +6,11 @@
 <!-- Responsive Width: Full Width on Small Screens, Half Width on Larger Screens -->
 <div class="w-full md:w-1/2 my-6 mx-auto p-6 bg-gray-100 rounded-xl">
     <h1 class="mb-4 text-3xl">Name: {{ request.user.username }}</h1>
+
+    <div class="mb-4">
+        <h2 class="text-lg font-semibold mb-2">Name:</h2>
+        <p>{{ profile.name }}</p>
+    </div>
     
     <div class="mb-4">
         <h2 class="text-lg font-semibold mb-2">Description:</h2>

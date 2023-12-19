@@ -39,8 +39,9 @@ class SignupForm(UserCreationForm):
 class ProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ['description', 'interests', 'profile_pic']
+        fields = ['name','description', 'interests', 'profile_pic']
         widgets = {
+            'name': forms.TextInput(attrs={'class': 'w-full py-4 px-6 rounded-xl', 'placeholder': 'name'}),
             'description': forms.TextInput(attrs={'class': 'w-full py-4 px-6 rounded-xl', 'placeholder': 'Description'}),
             'interests': forms.SelectMultiple(attrs={'class': 'w-full py-4 px-6 rounded-xl'}),
             'profile_pic': forms.FileInput(attrs={'class': 'w-full py-4 px-6 rounded-xl'}),

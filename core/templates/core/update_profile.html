@@ -8,6 +8,12 @@
 
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
+
+        <div class="mb-4">
+            <label for="id_description" class="block mb-2 text-lg">Name</label>
+            {{ form.name }}
+        </div>
+
         <div class="mb-4">
             <label for="id_description" class="block mb-2 text-lg">Description</label>
             {{ form.description }}

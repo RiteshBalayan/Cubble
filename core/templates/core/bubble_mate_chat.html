@@ -16,7 +16,7 @@
                 </a>
                 <h1 class="text-2xl font-bold mr-4">Chat with</h1>
                 <div class="w-12 h-12 rounded-full flex items-center justify-center bg-blue-200 hover:bg-blue-300">
-                    <span class="text-lg font-bold text-gray-800">{{ friend_profile.username }}</span>
+                    <span class="text-lg font-bold text-gray-800">{{ friend_profile.Profile.name}}</span>
                 </div>
             </div>
             <a href="{% url 'core:bubble_mate_chat_all' pk=bubble.id username=friend_profile.username %}" class="underline text-blue-500">Previous Chats</a>
