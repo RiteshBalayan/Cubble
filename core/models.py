@@ -188,4 +188,4 @@ class BubblePostResponseNotification(models.Model):
     post = models.ForeignKey(CommunityChat, on_delete=models.CASCADE, related_name='bubble_post_response_notification_post')
     receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='bubble_post_response_notification_sender')
     unread_count = models.IntegerField(default=0)
-    last_checked = models.DateTimeField(auto_now=True)
+    last_checked = models.DateTimeField(auto_now=True) 

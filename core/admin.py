@@ -13,7 +13,7 @@ admin.site.register(Bubblemate_chat)
 admin.site.register(ProfileTag)
 admin.site.register(EntryTestSubmit)
 
-from .models import EntryTest, Question, Option, OptionResponse, Answer, MessageNotification, BubbleMessageNotification
+from .models import EntryTest, Question, Option, OptionResponse, Answer, MessageNotification, BubbleMessageNotification, BubblePostResponseNotification
 
 @admin.register(EntryTest)
 class EntryTestAdmin(admin.ModelAdmin):
@@ -58,3 +58,8 @@ class MessageNotificationAdmin(admin.ModelAdmin):
 class BubbleMessageNotificationAdmin(admin.ModelAdmin):
     list_display = ('receiver', 'sender', 'unread_count', 'bubble',)
     list_filter = ('sender','bubble',)
+
+@admin.register(BubblePostResponseNotification)
+class BubblePostResponseNotificationAdmin(admin.ModelAdmin):
+    list_display = ('receiver', 'post', 'unread_count', 'bubble',)
+    list_filter = ('bubble','post',)

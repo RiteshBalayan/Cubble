@@ -46,157 +46,149 @@
             <ul id="post-container">
                 <!-- Chat messages will be loaded here by JavaScript -->
             </ul>
+            
         </div>
 
         {% if bubble.status == '1' %}
 
-        <h2 class="text-xl font-bold mb-4">New Community Post</h2>
+            <h2 class="text-xl font-bold mb-4">New Community Post</h2>
 
-        <form id="comment-form" class="mb-6">
-            {% csrf_token %}
-            <input type="text" name="title" placeholder="Title" class="w-full rounded-lg border-gray-300 focus:border-blue-500 resize-none p-3 focus:outline-none mb-4" required>
-            <textarea name="message" class="w-full rounded-lg border-gray-300 focus:border-blue-500 resize-none p-3 focus:outline-none" rows="4" placeholder="Type your message here..." required></textarea>
-            <button type="submit" class="mt-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg focus:outline-none transition duration-300">Start Post</button>
-        </form>
+            <form id="comment-form" class="mb-6">
+                {% csrf_token %}
+                <input type="text" name="title" placeholder="Title" class="w-full rounded-lg border-gray-300 focus:border-blue-500 resize-none p-3 focus:outline-none mb-4" required>
+                <textarea name="message" class="w-full rounded-lg border-gray-300 focus:border-blue-500 resize-none p-3 focus:outline-none" rows="4" placeholder="Type your message here..." required></textarea>
+                <button type="submit" class="mt-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg focus:outline-none transition duration-300">Start Post</button>
+            </form>
 
         {% elif bubble.status == '2' %}
-        <h2 class="text-xl font-bold mb-4">You can't start new conversation Now</h2>
-        <br>
-        <h2 class="text-xl font-bold mb-4">Let's swipe</h2>
+            <h2 class="text-xl font-bold mb-4">You can't start new conversation Now</h2>
+            <br>
+            <h2 class="text-xl font-bold mb-4">Let's swipe</h2>
 
-        {% for member in members_in_bubble %}
-            {% if member.user_id in user_friends %}
-            <div class="user-profile" data-user-id="{{member.user_id.id}}">
-                <div class="w-12 h-12 rounded-full flex items-center justify-center bg-blue-200 hover:bg-blue-300">
-                    <span class="text-lg font-bold text-gray-800">{{ member.user_id.username|first|upper }}</span>
+            {% for member in members_in_bubble %}
+                {% if member.user_id in user_friends %}
+                <div class="user-profile" data-user-id="{{member.user_id.id}}">
+                    <div class="w-12 h-12 rounded-full flex items-center justify-center bg-blue-200 hover:bg-blue-300">
+                        <span class="text-lg font-bold text-gray-800">{{ member.user_id.username|first|upper }}</span>
+                    </div>
+                    <br>
+                    <P>You are friend</P>
+                    <br><br>
+        
+                {% elif member.user_id in user_friends_pending  %}
+                <div class="user-profile" data-user-id="{{member.user_id.id}}">
+                    <div class="w-12 h-12 rounded-full flex items-center justify-center bg-blue-200 hover:bg-blue-300">
+                        <span class="text-lg font-bold text-gray-800">{{ member.user_id.username|first|upper }}</span>
+                    </div>
+                    <br>
+                    <p> Friend request sent </p>
+                    <br>
+                    {% csrf_token %}
+                    <button class="swipe-left bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full transition duration-300 ease-in-out "onclick="refreshPage()">
+                        Swipe Left
+                    </button>
+                    <button class="swipe-right bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full transition duration-300 ease-in-out"onclick="refreshPage()">
+                        Swipe Right
+                    </button>
                 </div>
-                <br>
-                <P>You are friend</P>
                 <br><br>
-    
-            {% elif member.user_id in user_friends_pending  %}
-            <div class="user-profile" data-user-id="{{member.user_id.id}}">
-                <div class="w-12 h-12 rounded-full flex items-center justify-center bg-blue-200 hover:bg-blue-300">
-                    <span class="text-lg font-bold text-gray-800">{{ member.user_id.username|first|upper }}</span>
+                {% else  %}
+                <div class="user-profile" data-user-id="{{member.user_id.id}}">
+                    <div class="w-12 h-12 rounded-full flex items-center justify-center bg-blue-200 hover:bg-blue-300">
+                        <span class="text-lg font-bold text-gray-800">{{ member.user_id.username|first|upper }}</span>
+                    </div>
+                    <br>
+                    <p> Swipe right to send Request </p>
+                    <br>
+                    {% csrf_token %}
+                    <button class="swipe-left bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full transition duration-300 ease-in-out "onclick="refreshPage()">
+                        Swipe Left
+                    </button>
+                    <button class="swipe-right bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full transition duration-300 ease-in-out"onclick="refreshPage()">
+                        Swipe Right
+                    </button>
+                <br>
+                <br>
                 </div>
-                <br>
-                <p> Friend request sent </p>
-                <br>
-                {% csrf_token %}
-                <button class="swipe-left bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full transition duration-300 ease-in-out "onclick="refreshPage()">
-                    Swipe Left
-                </button>
-                <button class="swipe-right bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full transition duration-300 ease-in-out"onclick="refreshPage()">
-                    Swipe Right
-                </button>
-            </div>
-            <br><br>
-            {% else  %}
-            <div class="user-profile" data-user-id="{{member.user_id.id}}">
-                <div class="w-12 h-12 rounded-full flex items-center justify-center bg-blue-200 hover:bg-blue-300">
-                    <span class="text-lg font-bold text-gray-800">{{ member.user_id.username|first|upper }}</span>
-                </div>
-                <br>
-                <p> Swipe right to send Request </p>
-                <br>
-                {% csrf_token %}
-                <button class="swipe-left bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full transition duration-300 ease-in-out "onclick="refreshPage()">
-                    Swipe Left
-                </button>
-                <button class="swipe-right bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full transition duration-300 ease-in-out"onclick="refreshPage()">
-                    Swipe Right
-                </button>
-            <br>
-            <br>
-            </div>
-            {% endif %}
-        {% endfor %}
-
-
-
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-    <!--Java Script for swipe button -->
-<script>
-        $(document).ready(function() {
-            $('.swipe-left, .swipe-right').click(function() {
-                var userId = $(this).closest('.user-profile').data('user-id');
-                var action = $(this).hasClass('swipe-left') ? 'left' : 'right';
-
-                handleSwipe(userId, action);
-            });
-        });
-
-    function handleSwipe(userId, action, button) {
-        $.ajax({
-            url: `/swipe/${userId}/${action}/`,
-            method: 'POST',
-            headers: {"X-CSRFToken": "{{ csrf_token }}"},
-            success: function(response) {
-                // Change the color of the clicked button only
-                if (action === 'left') {
-                    button.addClass('bg-red-800').removeClass('bg-red-500 hover:bg-red-700');
-                } else if (action === 'right') {
-                    button.addClass('bg-green-800').removeClass('bg-green-500 hover:bg-green-700');
-                }
-            },
-            error: function() {
-                alert('Error processing swipe.');
-            }
-        });
-    }
-
-    function refreshPage() {
-            window.location.reload();
-        }
-</script>
-
-<!--
-<script>
-    $(document).ready(function() {
-        $('.swipe-left, .swipe-right').click(function() {
-            var userId = $(this).closest('.user-profile').data('user-id');
-            var action = $(this).hasClass('swipe-left') ? 'left' : 'right';
-            var button = $(this);
-
-            handleSwipe(userId, action, button);
-        });
-    });
-
-    function handleSwipe(userId, action, button) {
-        $.ajax({
-            url: `/swipe/${userId}/${action}/`,
-            method: 'POST',
-            headers: {"X-CSRFToken": "{{ csrf_token }}"},
-            success: function(response) {
-                // Change the button color based on the swipe action
-                if (action === 'left') {
-                    button.removeClass('bg-red-500 hover:bg-red-700').addClass('bg-red-800');
-                } else if (action === 'right') {
-                    button.removeClass('bg-green-500 hover:bg-green-700').addClass('bg-green-800');
-                }
-            },
-            error: function() {
-                alert('Error processing swipe.');
-            }
-        });
-    }
-</script>
--->
-
-
+                {% endif %}
+            {% endfor %}
 
         {% else %}
         <h2 class="text-xl font-bold mb-4">Archived Bubble</h2>
         {% endif %}
+   </div>
 
+   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
+   <!--Java Script for swipe button -->
+   <script>
+           $(document).ready(function() {
+               $('.swipe-left, .swipe-right').click(function() {
+                   var userId = $(this).closest('.user-profile').data('user-id');
+                   var action = $(this).hasClass('swipe-left') ? 'left' : 'right';
 
+                   handleSwipe(userId, action);
+               });
+           });
 
-    </div>
+       function handleSwipe(userId, action, button) {
+           $.ajax({
+               url: `/swipe/${userId}/${action}/`,
+               method: 'POST',
+               headers: {"X-CSRFToken": "{{ csrf_token }}"},
+               success: function(response) {
+                   // Change the color of the clicked button only
+                   if (action === 'left') {
+                       button.addClass('bg-red-800').removeClass('bg-red-500 hover:bg-red-700');
+                   } else if (action === 'right') {
+                       button.addClass('bg-green-800').removeClass('bg-green-500 hover:bg-green-700');
+                   }
+               },
+               error: function() {
+                   alert('Error processing swipe.');
+               }
+           });
+       }
 
+       function refreshPage() {
+               window.location.reload();
+           }
+   </script>
+
+   <!--
+   <script>
+       $(document).ready(function() {
+           $('.swipe-left, .swipe-right').click(function() {
+               var userId = $(this).closest('.user-profile').data('user-id');
+               var action = $(this).hasClass('swipe-left') ? 'left' : 'right';
+               var button = $(this);
+
+               handleSwipe(userId, action, button);
+           });
+       });
+
+       function handleSwipe(userId, action, button) {
+           $.ajax({
+               url: `/swipe/${userId}/${action}/`,
+               method: 'POST',
+               headers: {"X-CSRFToken": "{{ csrf_token }}"},
+               success: function(response) {
+                   // Change the button color based on the swipe action
+                   if (action === 'left') {
+                       button.removeClass('bg-red-500 hover:bg-red-700').addClass('bg-red-800');
+                   } else if (action === 'right') {
+                       button.removeClass('bg-green-500 hover:bg-green-700').addClass('bg-green-800');
+                   }
+               },
+               error: function() {
+                   alert('Error processing swipe.');
+               }
+           });
+       }
+   </script>
+   -->
 <!-- JavaScript to fetch posts -->
-<script>
+<!-- <script>
     function updatePost() {
         const bubbleId = '{{ bubble.id }}';
     
@@ -222,7 +214,71 @@
     
     // Initial fetch when the page loads
     $(document).ready(updatePost);
-    </script>
+</script> -->
+
+
+<script>
+    function updatePost() {
+        const bubbleId = '{{ bubble.id }}';
+
+        $.ajax({
+            url: `/fetch-post/${bubbleId}`,
+            dataType: 'json',
+            success: function (data) {
+                const postList = data.posts.map(message => `
+                <div class="relative ">
+                    <a href="/bubble/${bubbleId}/bubble_post/${message.post_id}/" class="block py-3 px-4 rounded-md shadow-md hover:shadow-lg mb-3 transition duration-300 bg-blue-50 hover:bg-blue-200">
+                        
+                            <p class="font-semibold">${message.title}</p>
+                            <p class="text-gray-600">${message.message}</p>
+
+                            <span class="absolute top-0 right-0 z-10 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 bg-red-600 rounded-full">
+                                <div class="response-count-box" data-post-id="${message.post_id}" data-bubble-id="${bubbleId}"></div>
+                            </span>
+                        
+                    </a>
+                </div>
+                `).join('');
+
+                const postContainer = $('#post-container');
+                postContainer.html(postList || '<li>No Post found</li>');
+
+                // Trigger the response count update
+                fetchMessageResponseCounts();
+            }
+        });
+    }
+
+    // Call updatePost function periodically
+    setInterval(updatePost, 5000);
+
+    // Initial fetch when the page loads
+    $(document).ready(updatePost);
+</script>
+
+<!-- JS to fetch unread count -->
+<script>
+    function fetchMessageResponseCounts() {
+        const messageCountBoxes = document.querySelectorAll('.response-count-box');
+
+        messageCountBoxes.forEach(box => {
+            const postId = box.getAttribute('data-post-id'); // Ensure this matches the data attribute set in the post update script
+            const bubbleID = box.getAttribute('data-bubble-id');
+
+            fetch(`/get-bubble-post-responce-message-count/${postId}/${bubbleID}`)
+                .then(response => response.json())
+                .then(data => {
+                    box.textContent = data.unread_count;
+                })
+                .catch(error => console.error('Error:', error));
+        });
+    }
+
+    // Initial fetch
+    fetchMessageResponseCounts();
+    //setInterval(fetchMessageResponseCounts, 10000); // Fetch every 10 seconds
+</script>
+
     
 <!-- Java Script for submiting comments-->
 <script>
@@ -280,10 +336,6 @@
     fetchMessageCounts();
     setInterval(fetchMessageCounts, 10000); // Fetch every 10 seconds
 </script>
-
-
-
-
 
 {% endblock %}
 

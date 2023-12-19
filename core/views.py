@@ -467,6 +467,8 @@ def fetch_post_response(request, pk, post_id):
         post_data = [{
             "sender": response.user.user_id.username[:1],
             "sender_id": response.user.user_id.id,
+            "bubble_id": Bubble_id,
+            "post_id" : bubble_post.id,
             "message": response.message,
             "created_at": response.created_on.strftime("%Y-%m-%d %H:%M:%S"),
             "post_id": response.id
@@ -485,6 +487,8 @@ def post_post_response(request, pk, post_id):
     bubble = get_object_or_404(Bubble, pk=pk)
     bubble_post = get_object_or_404(CommunityChat, id=post_id)
     Bubble_id = bubble.id
+    members_in_bubble = BubbleMember.objects.filter(bubble_id=Bubble_id)
+
     if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         form = BubblePostResponseForm(request.POST)
         if form.is_valid():
@@ -492,6 +496,20 @@ def post_post_response(request, pk, post_id):
             post.user = BubbleMember.objects.get(bubble_id=Bubble_id, user_id=request.user )
             post.original_chat = bubble_post
             post.save()
+            
+            # Iterate over all members in the bubble to update notifications
+            for member in members_in_bubble:
+                notification, created = BubblePostResponseNotification.objects.get_or_create(
+                    bubble=bubble, 
+                    receiver=member.user_id,  # Assuming receiver is a user object
+                    post=bubble_post,
+                    defaults={'unread_count': 1}
+                )
+                if not created:
+                    notification.unread_count += 1
+                    notification.save()
+
+
             return JsonResponse({'status': 'success', 'message': post.message })
         else:
             return JsonResponse({'status': 'error', 'errors': form.errors})
@@ -688,11 +706,27 @@ def reset_bubble_message_count(request, sender_id, pk):
     BubbleMessageNotification.objects.filter(receiver=receiver, sender_id=sender_id, bubble=pk).update(unread_count=0)
     return JsonResponse({'status': 'success'})
 
+from core.models import BubblePostResponseNotification
 
 @login_required
 def get_bubble_post_responce_message_count(request, pk, post_id):
     receiver = request.user
     bubble = Bubble.objects.get(pk=pk)
+    post = CommunityChat.objects.get(pk=post_id)
+    try:
+        notification = BubblePostResponseNotification.objects.get(bubble=bubble, receiver=receiver, post=post)
+    except BubblePostResponseNotification.DoesNotExist:
+        notification = BubblePostResponseNotification.objects.create(bubble=bubble, receiver=receiver, post=post)
+
+    return JsonResponse({'unread_count': notification.unread_count})
+
+@login_required
+def reset_bubble_post_responce_message_count(request, pk, post_id):
+    receiver = request.user
+    post = CommunityChat.objects.get(pk=post_id)
+    BubblePostResponseNotification.objects.filter(receiver=receiver, post=post, bubble=pk).update(unread_count=0)
+    return JsonResponse({'status': 'success'})
+
 
 from datetime import timedelta
 from django.utils import timezone
