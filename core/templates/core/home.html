@@ -52,16 +52,24 @@
                 <span>Answer few questions so that we can match you with the right bubble {{test_submit.Submit}}</span>
             </div>
         {% endif %}
+
+
+    {% endif %}
+    {% load static %}
+
+    <br><br><br>
+    <h2 class="text-3xl font-bold text-main-color underline">How to use Platform</h2>
+    <br><br>
+
+    <!-- Video container at the end of the content -->
+    <div class="video-container mt-10 mb-10">
+        <video controls class="w-full">
+            <source src="{% static 'staticlogo/tutorial.mp4' %}" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
     </div>
 
-
 </div>
-    {% else %}
-            {% load static %}
-            <img src="{% static 'staticlogo/homescreen.jpeg' %}" alt="Description of the image" class="fixed top-0 left-0 w-screen w-screen object-cover z-[-1]">
-            <!-- Add team building content -->
-        </div>
-    {% endif %}
 <br>
 <br>
 <br>
